@@ -2,26 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GoalGuru.ai</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-indigo-100 via-white to-pink-100 min-h-screen flex items-center justify-center">
+<body class="bg-gradient-to-br from-yellow-100 via-white to-pink-100 min-h-screen flex items-center justify-center">
 
   <div class="bg-white shadow-xl rounded-2xl p-8 max-w-lg w-full space-y-6 border border-gray-200">
     <h1 class="text-3xl font-bold text-center text-indigo-600">🎯 GoalGuru.ai</h1>
-    <p class="text-center text-gray-600">Your savage AI accountability partner</p>
+    <p class="text-center text-gray-600">Your desi AI accountability buddy</p>
 
-    <form method="POST" class="space-y-4">
+    <form method="POST" id="goalForm" class="space-y-4">
       <div>
         <label class="block text-sm font-medium text-gray-700">Your Goal:</label>
-        <textarea name="goal" required placeholder="I want to lose 5kg..."
+        <textarea name="goal" id="goalInput" required placeholder="I want to become rich"
           class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3"></textarea>
       </div>
 
       <div>
         <label class="block text-sm font-medium text-gray-700">Preferred Language:</label>
-        <select name="lang" required
+        <select name="lang" id="langInput" required
           class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3">
           <option value="english">English</option>
           <option value="hindi">हिंदी</option>
@@ -36,12 +35,78 @@
     </form>
 
     {% if task %}
-    <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 mt-6">
+    <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 mt-6" id="taskBox">
       <h3 class="text-lg font-semibold text-indigo-700 mb-2">🧠 Today's Task</h3>
-      <p class="text-gray-800">{{ task }}</p>
+      <p class="text-gray-800" id="taskText">{{ task }}</p>
+
+      <div class="mt-4 flex gap-2">
+        <button onclick="markCompleted()"
+          class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-3 rounded">✅ Task Done</button>
+        <button onclick="deleteGoal()"
+          class="bg-red-500 hover:bg-red-600 text-white text-sm py-2 px-3 rounded">🗑️ Delete Goal</button>
+      </div>
     </div>
     {% endif %}
+
+    <div id="tauntBox" class="text-center text-red-600 text-sm font-medium"></div>
   </div>
+
+  <script>
+    // 🧠 Save goal, lang, and task status
+    document.getElementById('goalForm').addEventListener('submit', function () {
+      const goal = document.getElementById('goalInput').value;
+      const lang = document.getElementById('langInput').value;
+      localStorage.setItem("goal", goal);
+      localStorage.setItem("lang", lang);
+      localStorage.setItem("task_done", "no");
+    });
+
+    // 🧠 Load existing goal/lang
+    window.onload = function () {
+      const savedGoal = localStorage.getItem("goal");
+      const savedLang = localStorage.getItem("lang");
+      const taskDone = localStorage.getItem("task_done");
+
+      if (savedGoal) document.getElementById("goalInput").value = savedGoal;
+      if (savedLang) document.getElementById("langInput").value = savedLang;
+
+      // If task not done, show taunt
+      if (taskDone === "no") {
+        showTaunt();
+      }
+    };
+
+    // ✅ Mark task complete
+    function markCompleted() {
+      localStorage.setItem("task_done", "yes");
+      alert("Task completed! Good job! 🎉");
+      location.reload();
+    }
+
+    // ❌ Delete goal
+    function deleteGoal() {
+      if (confirm("Are you sure you want to delete your goal?")) {
+        localStorage.removeItem("goal");
+        localStorage.removeItem("lang");
+        localStorage.removeItem("task_done");
+        alert("Goal deleted. Start fresh!");
+        location.reload();
+      }
+    }
+
+    // 😈 Savage reminder
+    function showTaunt() {
+      const taunts = [
+        "Still not done? Kya kar raha hai bhai? Time waste expert? 😂",
+        "You said big goal, but couldn’t finish one task? 👀",
+        "Goal toh Everest ka hai, par effort nimbu jaisa 🍋",
+        "Sab kuch AI kare, tu kya karega? Neend? 😴",
+        "Get up bro. Even chaiwala had more hustle. ☕"
+      ];
+      const index = Math.floor(Math.random() * taunts.length);
+      document.getElementById("tauntBox").innerText = taunts[index];
+    }
+  </script>
 
 </body>
 </html>
