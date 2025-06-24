@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GoalGuru.ai</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
+        .box { background: white; padding: 25px; border-radius: 10px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; border: none; background: #007bff; color: white; border-radius: 6px; cursor: pointer; }
+        h1, h3 { text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>🎯 GoalGuru.ai</h1>
+        <form method="POST">
+            <label>Your Goal:</label>
+            <textarea name="goal" required placeholder="E.g. I want to lose 5kg..."></textarea>
+            <button type="submit">Get Today’s Task</button>
+        </form>
+
+        {% if task %}
+            <hr>
+            <h3>🧠 Today's AI Task:</h3>
+            <p>{{ task }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>
