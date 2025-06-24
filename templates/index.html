@@ -9,13 +9,20 @@
 <body class="bg-gradient-to-br from-yellow-50 via-white to-pink-50 min-h-screen flex items-center justify-center px-4">
 
   <div class="bg-white shadow-xl rounded-2xl p-6 sm:p-8 max-w-lg w-full space-y-6 border border-gray-200">
-    <h1 class="text-2xl sm:text-3xl font-bold text-center text-indigo-600">🎯 GoalGuru.ai</h1>
+    <h1 class="text-3xl font-bold text-center text-indigo-600">🎯 GoalGuru.ai</h1>
     <p class="text-center text-gray-600 text-sm sm:text-base">Your desi AI accountability buddy</p>
 
     <!-- Saved Info Section -->
-    <div id="savedInfo" class="hidden bg-gray-50 p-4 rounded-xl text-sm border border-gray-200">
+    <div id="savedInfo" class="hidden bg-gray-50 p-4 rounded-xl text-sm border border-gray-200 space-y-2">
       <p class="text-gray-700"><strong>Your Goal:</strong> <span id="savedGoalText"></span></p>
       <p class="text-gray-700"><strong>Language:</strong> <span id="savedLangText"></span></p>
+      <p class="text-gray-700"><strong>Progress:</strong> <span id="progressCount">0</span>/30 days</p>
+
+      <div class="w-full bg-gray-200 rounded-full h-3">
+        <div id="progressBar" class="bg-indigo-500 h-3 rounded-full" style="width: 0%"></div>
+      </div>
+
+      <p id="encourage" class="text-green-600 font-medium pt-2 text-sm hidden">🔥 You're on fire! Keep going!</p>
     </div>
 
     <!-- Form -->
@@ -36,7 +43,7 @@
         </select>
       </div>
 
-      <button type="submit"
+      <button id="submitBtn" type="submit"
         class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
         🔥 Get Today’s AI Task
       </button>
@@ -65,19 +72,35 @@
       const goal = localStorage.getItem("goal");
       const lang = localStorage.getItem("lang");
       const status = localStorage.getItem("task_done");
+      const progress = parseInt(localStorage.getItem("progress") || "0");
 
+      // Load previous data
       if (goal) {
         document.getElementById("savedInfo").classList.remove("hidden");
         document.getElementById("savedGoalText").innerText = goal;
         document.getElementById("goalInput").value = goal;
       }
-
       if (lang) {
         document.getElementById("savedLangText").innerText = lang;
         document.getElementById("langInput").value = lang;
       }
 
-      if (status === "no") showTaunt();
+      // Load progress bar
+      if (progress > 0) {
+        document.getElementById("progressCount").innerText = progress;
+        const percentage = Math.min(100, Math.floor((progress / 30) * 100));
+        document.getElementById("progressBar").style.width = percentage + "%";
+        if (progress >= 3) {
+          document.getElementById("encourage").classList.remove("hidden");
+        }
+      }
+
+      // Prevent getting new task if not completed
+      if (status === "no") {
+        document.getElementById("submitBtn").disabled = true;
+        document.getElementById("submitBtn").innerText = "⚠️ Complete current task first!";
+        showTaunt();
+      }
     };
 
     // Save on submit
@@ -90,26 +113,29 @@
     });
 
     function markCompleted() {
+      let progress = parseInt(localStorage.getItem("progress") || "0");
+      progress += 1;
       localStorage.setItem("task_done", "yes");
-      alert("🎉 Nice! Task marked as done.");
+      localStorage.setItem("progress", progress);
+      alert(`✅ Task marked as done! Progress: ${progress}/30`);
       location.reload();
     }
 
     function deleteGoal() {
-      if (confirm("Are you sure you want to delete this goal and reset?")) {
+      if (confirm("Are you sure you want to delete this goal and reset everything?")) {
         localStorage.clear();
-        alert("🗑️ All goal data cleared.");
+        alert("🗑️ All data cleared.");
         location.reload();
       }
     }
 
     function showTaunt() {
       const taunts = [
-        "Bro still pending? Kal kare so aaj kar bro!",
-        "Goal toh moon ka, lekin neend priority hai 😴",
-        "Even AI has given up on you 😂",
-        "Task ka kya hua? Insta reel complete kiya kya?",
-        "GoalGuru is watching. Disappointed, bro 👀"
+        "Bhai task toh complete kar! 😑",
+        "Bas goal set kiya, karne ka kya?",
+        "AI bhi thak gaya tujhe dekh ke 🫠",
+        "Bina kaam ke dream sirf sapna hota hai 💤",
+        "Tu kare ya main karu? 😤"
       ];
       const msg = taunts[Math.floor(Math.random() * taunts.length)];
       document.getElementById("tauntBox").innerText = msg;
