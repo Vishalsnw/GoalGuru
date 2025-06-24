@@ -7,7 +7,7 @@ load_dotenv()
 app = Flask(__name__)
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
-# DeepSeek API Integration
+# 🔮 DeepSeek AI Task Generator
 def generate_ai_task(user_goal, lang):
     headers = {
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
@@ -39,6 +39,7 @@ Use ONLY the selected language. Be simple, relatable and bold.
     except Exception as e:
         return f"⚠️ DeepSeek Error: {e}"
 
+# 🌐 Routes
 @app.route("/", methods=["GET", "POST"])
 def home():
     task = None
@@ -49,5 +50,6 @@ def home():
 
     return render_template("index.html", task=task)
 
+# 🚀 Run server
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
