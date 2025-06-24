@@ -6,7 +6,7 @@
     <style>
         body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
         .box { background: white; padding: 25px; border-radius: 10px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: 1px solid #ccc; }
+        input, textarea, select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 6px; border: 1px solid #ccc; }
         button { padding: 10px 20px; border: none; background: #007bff; color: white; border-radius: 6px; cursor: pointer; }
         h1, h3 { text-align: center; }
     </style>
@@ -17,6 +17,14 @@
         <form method="POST">
             <label>Your Goal:</label>
             <textarea name="goal" required placeholder="E.g. I want to lose 5kg..."></textarea>
+
+            <label>Preferred Language:</label>
+            <select name="lang" required>
+                <option value="english">English</option>
+                <option value="hindi">हिंदी</option>
+                <option value="marathi">मराठी</option>
+            </select>
+
             <button type="submit">Get Today’s Task</button>
         </form>
 
