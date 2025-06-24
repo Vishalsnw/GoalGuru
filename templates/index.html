@@ -2,15 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GoalGuru.ai</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-yellow-100 via-white to-pink-100 min-h-screen flex items-center justify-center">
+<body class="bg-gradient-to-br from-yellow-50 via-white to-pink-50 min-h-screen flex items-center justify-center px-4">
 
-  <div class="bg-white shadow-xl rounded-2xl p-8 max-w-lg w-full space-y-6 border border-gray-200">
-    <h1 class="text-3xl font-bold text-center text-indigo-600">🎯 GoalGuru.ai</h1>
-    <p class="text-center text-gray-600">Your desi AI accountability buddy</p>
+  <div class="bg-white shadow-xl rounded-2xl p-6 sm:p-8 max-w-lg w-full space-y-6 border border-gray-200">
+    <h1 class="text-2xl sm:text-3xl font-bold text-center text-indigo-600">🎯 GoalGuru.ai</h1>
+    <p class="text-center text-gray-600 text-sm sm:text-base">Your desi AI accountability buddy</p>
 
+    <!-- Saved Info Section -->
+    <div id="savedInfo" class="hidden bg-gray-50 p-4 rounded-xl text-sm border border-gray-200">
+      <p class="text-gray-700"><strong>Your Goal:</strong> <span id="savedGoalText"></span></p>
+      <p class="text-gray-700"><strong>Language:</strong> <span id="savedLangText"></span></p>
+    </div>
+
+    <!-- Form -->
     <form method="POST" id="goalForm" class="space-y-4">
       <div>
         <label class="block text-sm font-medium text-gray-700">Your Goal:</label>
@@ -39,9 +47,9 @@
       <h3 class="text-lg font-semibold text-indigo-700 mb-2">🧠 Today's Task</h3>
       <p class="text-gray-800" id="taskText">{{ task }}</p>
 
-      <div class="mt-4 flex gap-2">
+      <div class="mt-4 flex flex-col sm:flex-row gap-3">
         <button onclick="markCompleted()"
-          class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-3 rounded">✅ Task Done</button>
+          class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-3 rounded">✅ Mark as Done</button>
         <button onclick="deleteGoal()"
           class="bg-red-500 hover:bg-red-600 text-white text-sm py-2 px-3 rounded">🗑️ Delete Goal</button>
       </div>
@@ -52,59 +60,59 @@
   </div>
 
   <script>
-    // 🧠 Save goal, lang, and task status
-    document.getElementById('goalForm').addEventListener('submit', function () {
-      const goal = document.getElementById('goalInput').value;
-      const lang = document.getElementById('langInput').value;
+    // Load on page
+    window.onload = function () {
+      const goal = localStorage.getItem("goal");
+      const lang = localStorage.getItem("lang");
+      const status = localStorage.getItem("task_done");
+
+      if (goal) {
+        document.getElementById("savedInfo").classList.remove("hidden");
+        document.getElementById("savedGoalText").innerText = goal;
+        document.getElementById("goalInput").value = goal;
+      }
+
+      if (lang) {
+        document.getElementById("savedLangText").innerText = lang;
+        document.getElementById("langInput").value = lang;
+      }
+
+      if (status === "no") showTaunt();
+    };
+
+    // Save on submit
+    document.getElementById("goalForm").addEventListener("submit", () => {
+      const goal = document.getElementById("goalInput").value;
+      const lang = document.getElementById("langInput").value;
       localStorage.setItem("goal", goal);
       localStorage.setItem("lang", lang);
       localStorage.setItem("task_done", "no");
     });
 
-    // 🧠 Load existing goal/lang
-    window.onload = function () {
-      const savedGoal = localStorage.getItem("goal");
-      const savedLang = localStorage.getItem("lang");
-      const taskDone = localStorage.getItem("task_done");
-
-      if (savedGoal) document.getElementById("goalInput").value = savedGoal;
-      if (savedLang) document.getElementById("langInput").value = savedLang;
-
-      // If task not done, show taunt
-      if (taskDone === "no") {
-        showTaunt();
-      }
-    };
-
-    // ✅ Mark task complete
     function markCompleted() {
       localStorage.setItem("task_done", "yes");
-      alert("Task completed! Good job! 🎉");
+      alert("🎉 Nice! Task marked as done.");
       location.reload();
     }
 
-    // ❌ Delete goal
     function deleteGoal() {
-      if (confirm("Are you sure you want to delete your goal?")) {
-        localStorage.removeItem("goal");
-        localStorage.removeItem("lang");
-        localStorage.removeItem("task_done");
-        alert("Goal deleted. Start fresh!");
+      if (confirm("Are you sure you want to delete this goal and reset?")) {
+        localStorage.clear();
+        alert("🗑️ All goal data cleared.");
         location.reload();
       }
     }
 
-    // 😈 Savage reminder
     function showTaunt() {
       const taunts = [
-        "Still not done? Kya kar raha hai bhai? Time waste expert? 😂",
-        "You said big goal, but couldn’t finish one task? 👀",
-        "Goal toh Everest ka hai, par effort nimbu jaisa 🍋",
-        "Sab kuch AI kare, tu kya karega? Neend? 😴",
-        "Get up bro. Even chaiwala had more hustle. ☕"
+        "Bro still pending? Kal kare so aaj kar bro!",
+        "Goal toh moon ka, lekin neend priority hai 😴",
+        "Even AI has given up on you 😂",
+        "Task ka kya hua? Insta reel complete kiya kya?",
+        "GoalGuru is watching. Disappointed, bro 👀"
       ];
-      const index = Math.floor(Math.random() * taunts.length);
-      document.getElementById("tauntBox").innerText = taunts[index];
+      const msg = taunts[Math.floor(Math.random() * taunts.length)];
+      document.getElementById("tauntBox").innerText = msg;
     }
   </script>
 
