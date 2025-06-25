@@ -5,8 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GoalGuru.ai</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    #loader {
+      display: none;
+    }
+  </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-100 via-white to-pink-100 min-h-screen font-sans">
+
+  <!-- Loading Animation -->
+  <div id="loader" class="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-90">
+    <div class="flex flex-col items-center gap-2">
+      <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-indigo-600 text-sm font-medium mt-2">Generating your AI task...</p>
+    </div>
+  </div>
 
   <!-- Navbar -->
   <header class="bg-indigo-600 text-white py-4 shadow-md sticky top-0 z-10">
@@ -40,7 +53,7 @@
       </div>
 
       <!-- Form -->
-      <form method="POST" id="goalForm" class="space-y-4">
+      <form method="POST" id="goalForm" class="space-y-4" onsubmit="showLoader()">
         <div>
           <label class="block text-sm font-medium text-gray-700">Your Goal:</label>
           <textarea name="goal" id="goalInput" required placeholder="I want to become rich"
@@ -62,10 +75,11 @@
       </form>
 
       <!-- Task Section -->
-      <div id="taskSection" class="hidden">
+      {% if task %}
+      <div id="taskSection">
         <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 mt-6" id="taskBox">
           <h3 class="text-lg font-semibold text-indigo-700 mb-2">🧠 Today's Task</h3>
-          <p class="text-gray-800" id="taskText"></p>
+          <p class="text-gray-800" id="taskText">{{ task }}</p>
           <div class="mt-4 flex flex-col sm:flex-row gap-3">
             <button onclick="markCompleted()"
               class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-3 rounded">✅ Mark as Done</button>
@@ -75,6 +89,7 @@
         </div>
         <div id="tauntBox" class="text-center text-red-600 text-sm font-medium mt-4"></div>
       </div>
+      {% endif %}
 
       <!-- Calendar Placeholder -->
       <div id="calendar" class="mt-6 hidden text-center">
@@ -83,7 +98,6 @@
     </div>
   </main>
 
-  <!-- Footer -->
   <footer class="text-center text-xs text-gray-400 py-6">© 2025 GoalGuru.ai - Made in India 🇮🇳</footer>
 
   <script>
@@ -91,46 +105,9 @@
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     }
 
-    window.onload = function () {
-      const goal = localStorage.getItem("goal");
-      const lang = localStorage.getItem("lang");
-      const taskDone = localStorage.getItem("task_done");
-      const task = localStorage.getItem("task") || "Complete 1 step toward your goal today!";
-      const progress = parseInt(localStorage.getItem("progress") || "0");
-
-      if (goal) {
-        document.getElementById("savedInfo").classList.remove("hidden");
-        document.getElementById("savedGoalText").innerText = goal;
-        document.getElementById("goalInput").value = goal;
-        document.getElementById("taskSection").classList.remove("hidden");
-        document.getElementById("taskText").innerText = task;
-      }
-
-      if (lang) document.getElementById("langInput").value = lang;
-      if (lang) document.getElementById("savedLangText").innerText = lang;
-
-      if (progress > 0) {
-        document.getElementById("progressCount").innerText = progress;
-        const percent = Math.min(100, Math.floor((progress / 30) * 100));
-        document.getElementById("progressBar").style.width = percent + "%";
-        if (progress >= 3) document.getElementById("encourage").classList.remove("hidden");
-      }
-
-      if (taskDone === "no") {
-        document.getElementById("submitBtn").disabled = true;
-        document.getElementById("submitBtn").innerText = "⚠️ Complete current task first!";
-        showTaunt();
-      }
-    };
-
-    document.getElementById("goalForm").addEventListener("submit", () => {
-      const goal = document.getElementById("goalInput").value;
-      const lang = document.getElementById("langInput").value;
-      localStorage.setItem("goal", goal);
-      localStorage.setItem("lang", lang);
-      localStorage.setItem("task_done", "no");
-      localStorage.setItem("task", "Complete 1 step toward your goal today!");
-    });
+    function showLoader() {
+      document.getElementById("loader").style.display = "flex";
+    }
 
     function markCompleted() {
       let progress = parseInt(localStorage.getItem("progress") || "0");
@@ -159,6 +136,37 @@
       ];
       const msg = taunts[Math.floor(Math.random() * taunts.length)];
       document.getElementById("tauntBox").innerText = msg;
+    }
+
+    window.onload = function () {
+      const goal = localStorage.getItem("goal");
+      const lang = localStorage.getItem("lang");
+      const taskDone = localStorage.getItem("task_done");
+      const progress = parseInt(localStorage.getItem("progress") || "0");
+
+      if (goal) {
+        document.getElementById("savedInfo").classList.remove("hidden");
+        document.getElementById("savedGoalText").innerText = goal;
+        document.getElementById("goalInput").value = goal;
+      }
+
+      if (lang) {
+        document.getElementById("langInput").value = lang;
+        document.getElementById("savedLangText").innerText = lang;
+      }
+
+      if (progress > 0) {
+        document.getElementById("progressCount").innerText = progress;
+        const percent = Math.min(100, Math.floor((progress / 30) * 100));
+        document.getElementById("progressBar").style.width = percent + "%";
+        if (progress >= 3) document.getElementById("encourage").classList.remove("hidden");
+      }
+
+      if (taskDone === "no") {
+        document.getElementById("submitBtn").disabled = true;
+        document.getElementById("submitBtn").innerText = "⚠️ Complete current task first!";
+        showTaunt();
+      }
     }
   </script>
 
