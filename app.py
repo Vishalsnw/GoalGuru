@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
-import requests, os
+import requests
+import os
 from dotenv import load_dotenv
 from datetime import datetime
 
@@ -22,20 +23,21 @@ Date: {today}
 User's goal: {user_goal}
 Preferred language: {lang}
 
-Generate a specific, real, and bold daily task to help the user move toward their goal.
+Generate a bold, actionable task to push the user toward their goal TODAY.
 
-Style:
-- Be simple, savage, like a desi friend or parent.
-- No roast if the user completed the last task.
-- Avoid repeating same jokes or insults daily.
-- Use the selected language only.
+Instructions:
+- Be sharp, to-the-point and practical.
+- Style like a desi best friend or strict parent (but don’t roast daily).
+- No repetition of jokes or generic lines.
+- Use only the chosen language.
+- No fluffy advice. Give a direct, doable task.
 """
 
     payload = {
         "model": "deepseek-chat",
         "temperature": 0.7,
         "messages": [
-            {"role": "system", "content": "You are a sharp, desi AI goal coach. Speak like a witty Indian friend or strict parent. Use humour only sometimes, not every day."},
+            {"role": "system", "content": "You are a smart, desi accountability AI. You sound like a caring but savage Indian friend or elder. Use humour only occasionally. Always give 1 real, practical task."},
             {"role": "user", "content": prompt}
         ]
     }
@@ -45,8 +47,8 @@ Style:
         res.raise_for_status()
         return res.json()["choices"][0]["message"]["content"].strip()
     except Exception as e:
-        return f"⚠️ DeepSeek Error: {e}"
-
+        print("❌ API Error:", e)
+        return "⚠️ Unable to fetch task. Please try again later."
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -54,9 +56,9 @@ def home():
     if request.method == "POST":
         user_goal = request.form.get("goal")
         lang = request.form.get("lang")
-        task = generate_ai_task(user_goal, lang)
+        if user_goal and lang:
+            task = generate_ai_task(user_goal, lang)
     return render_template("index.html", task=task)
 
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)
