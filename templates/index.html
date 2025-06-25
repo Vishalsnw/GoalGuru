@@ -63,7 +63,7 @@
     </div>
     {% endif %}
 
-    <div id="tauntBox" class="text-center text-red-600 text-sm font-medium"></div>
+    <div id="tauntBox" class="text-center text-red-600 text-sm font-medium mt-4"></div>
   </div>
 
   <script>
@@ -74,28 +74,28 @@
       const status = localStorage.getItem("task_done");
       const progress = parseInt(localStorage.getItem("progress") || "0");
 
-      // Load previous data
       if (goal) {
         document.getElementById("savedInfo").classList.remove("hidden");
         document.getElementById("savedGoalText").innerText = goal;
         document.getElementById("goalInput").value = goal;
       }
+
       if (lang) {
         document.getElementById("savedLangText").innerText = lang;
         document.getElementById("langInput").value = lang;
       }
 
-      // Load progress bar
+      // Progress bar
       if (progress > 0) {
         document.getElementById("progressCount").innerText = progress;
-        const percentage = Math.min(100, Math.floor((progress / 30) * 100));
-        document.getElementById("progressBar").style.width = percentage + "%";
+        const percent = Math.min(100, Math.floor((progress / 30) * 100));
+        document.getElementById("progressBar").style.width = percent + "%";
         if (progress >= 3) {
           document.getElementById("encourage").classList.remove("hidden");
         }
       }
 
-      // Prevent getting new task if not completed
+      // Block task regeneration
       if (status === "no") {
         document.getElementById("submitBtn").disabled = true;
         document.getElementById("submitBtn").innerText = "⚠️ Complete current task first!";
