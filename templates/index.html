@@ -7,14 +7,13 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     #loader { display: none; }
-    #splashScreen video { max-height: 80vh; }
   </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-100 via-white to-pink-100 min-h-screen font-sans">
 
-  <!-- Splash Screen -->
-  <div id="splashScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-white">
-    <video autoplay muted playsinline onended="hideSplash()" class="rounded-xl shadow-xl w-3/4 max-w-md">
+  <!-- Splash Screen (Full Screen Video) -->
+  <div id="splashScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-black">
+    <video autoplay muted playsinline onended="hideSplash()" class="w-full h-full object-cover">
       <source src="/static/splash.mp4" type="video/mp4">
       Your browser does not support the video tag.
     </video>
@@ -43,7 +42,7 @@
     </div>
   </header>
 
-  <!-- Main Container -->
+  <!-- Main Content -->
   <main class="max-w-2xl mx-auto px-4 py-10">
     <div class="bg-white shadow-2xl rounded-3xl p-8 w-full space-y-6 border border-gray-200">
       <p class="text-center text-gray-600 text-sm sm:text-base">Your desi AI accountability buddy</p>
@@ -59,7 +58,7 @@
         <p id="encourage" class="text-green-600 font-medium pt-2 text-sm hidden">🔥 You're on fire! Keep going!</p>
       </div>
 
-      <!-- Form -->
+      <!-- Goal Form -->
       <form method="POST" id="goalForm" class="space-y-4" onsubmit="showLoader()">
         <div>
           <label class="block text-sm font-medium text-gray-700">Your Goal:</label>
@@ -81,7 +80,7 @@
         </button>
       </form>
 
-      <!-- Task Section -->
+      <!-- Task Display -->
       {% if task %}
       <div id="taskSection">
         <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 mt-6" id="taskBox">
@@ -106,6 +105,7 @@
   <!-- Footer -->
   <footer class="text-center text-xs text-gray-400 py-6">© 2025 GoalGuru.ai - Made in India 🇮🇳</footer>
 
+  <!-- Scripts -->
   <script>
     function scrollToSection(id) {
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -181,7 +181,7 @@
       }
 
       // Fallback splash hide
-      setTimeout(hideSplash, 6000); // In case video doesn't end
+      setTimeout(hideSplash, 6000);
     };
   </script>
 
