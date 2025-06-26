@@ -6,15 +6,22 @@
   <title>GoalGuru.ai</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    #loader {
-      display: none;
-    }
+    #loader { display: none; }
+    #splashScreen video { max-height: 80vh; }
   </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-100 via-white to-pink-100 min-h-screen font-sans">
 
+  <!-- Splash Screen -->
+  <div id="splashScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-white">
+    <video autoplay muted playsinline onended="hideSplash()" class="rounded-xl shadow-xl w-3/4 max-w-md">
+      <source src="/static/splash.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
   <!-- Loading Animation -->
-  <div id="loader" class="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-90">
+  <div id="loader" class="fixed inset-0 z-40 flex items-center justify-center bg-white bg-opacity-90">
     <div class="flex flex-col items-center gap-2">
       <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
       <p class="text-indigo-600 text-sm font-medium mt-2">Generating your AI task...</p>
@@ -22,7 +29,7 @@
   </div>
 
   <!-- Navbar -->
-  <header class="bg-indigo-600 text-white py-4 shadow-md sticky top-0 z-10">
+  <header class="bg-indigo-600 text-white py-4 shadow-md sticky top-0 z-30">
     <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
       <h1 class="text-2xl font-bold">🎯 GoalGuru</h1>
       <div class="relative group">
@@ -81,10 +88,8 @@
           <h3 class="text-lg font-semibold text-indigo-700 mb-2">🧠 Today's Task</h3>
           <p class="text-gray-800" id="taskText">{{ task }}</p>
           <div class="mt-4 flex flex-col sm:flex-row gap-3">
-            <button onclick="markCompleted()"
-              class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-3 rounded">✅ Mark as Done</button>
-            <button onclick="deleteGoal()"
-              class="bg-red-500 hover:bg-red-600 text-white text-sm py-2 px-3 rounded">🗑️ Delete Goal</button>
+            <button onclick="markCompleted()" class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-3 rounded">✅ Mark as Done</button>
+            <button onclick="deleteGoal()" class="bg-red-500 hover:bg-red-600 text-white text-sm py-2 px-3 rounded">🗑️ Delete Goal</button>
           </div>
         </div>
         <div id="tauntBox" class="text-center text-red-600 text-sm font-medium mt-4"></div>
@@ -98,6 +103,7 @@
     </div>
   </main>
 
+  <!-- Footer -->
   <footer class="text-center text-xs text-gray-400 py-6">© 2025 GoalGuru.ai - Made in India 🇮🇳</footer>
 
   <script>
@@ -107,6 +113,12 @@
 
     function showLoader() {
       document.getElementById("loader").style.display = "flex";
+    }
+
+    function hideSplash() {
+      const splash = document.getElementById("splashScreen");
+      splash.classList.add("opacity-0", "transition-opacity", "duration-700");
+      setTimeout(() => splash.remove(), 700);
     }
 
     function markCompleted() {
@@ -167,7 +179,10 @@
         document.getElementById("submitBtn").innerText = "⚠️ Complete current task first!";
         showTaunt();
       }
-    }
+
+      // Fallback splash hide
+      setTimeout(hideSplash, 6000); // In case video doesn't end
+    };
   </script>
 
 </body>
