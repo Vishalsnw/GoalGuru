@@ -45,14 +45,12 @@
   <div id="customToast">✅ Progress saved!</div>
   <div id="reminderToast"></div>
 
-  <!-- Splash Screen -->
   <div id="splashScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-black">
     <video autoplay muted playsinline onended="hideSplash()" class="w-full h-full object-cover">
       <source src="/static/splash.mp4" type="video/mp4">
     </video>
   </div>
 
-  <!-- Loader -->
   <div id="loader" class="fixed inset-0 z-40 flex items-center justify-center bg-white bg-opacity-90 dark:bg-black dark:bg-opacity-90">
     <div class="flex flex-col items-center gap-2">
       <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
@@ -60,7 +58,6 @@
     </div>
   </div>
 
-  <!-- Header -->
   <header class="bg-indigo-600 text-white py-4 shadow-md sticky top-0 z-30">
     <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
       <h1 class="text-2xl font-bold">🎯 GoalGuru</h1>
@@ -78,12 +75,10 @@
     </div>
   </header>
 
-  <!-- Main Content -->
   <main class="max-w-2xl mx-auto px-4 py-10">
     <div class="bg-white shadow-2xl rounded-3xl p-8 space-y-6 border border-gray-200 dark:border-gray-700">
       <p class="text-center text-gray-600 text-sm sm:text-base dark:text-gray-300">Your desi AI accountability buddy</p>
 
-      <!-- Progress Info -->
       <div id="savedInfo" class="hidden bg-gray-50 p-4 rounded-xl text-sm border space-y-2 dark:bg-gray-800">
         <p><strong>Your Goal:</strong> <span id="savedGoalText"></span></p>
         <p><strong>Language:</strong> <span id="savedLangText"></span></p>
@@ -94,7 +89,6 @@
         <p id="encourage" class="text-green-600 font-medium text-sm hidden">🔥 You're on fire!</p>
       </div>
 
-      <!-- Goal Form -->
       <form id="goalForm" class="space-y-4">
         <div>
           <label class="block text-sm font-medium">Your Goal:</label>
@@ -105,7 +99,6 @@
         </button>
       </form>
 
-      <!-- Roadmap -->
       <div id="roadmapSection" class="hidden">
         <div class="bg-yellow-50 p-4 rounded-xl border space-y-3 dark:bg-yellow-900">
           <h3 class="text-lg font-semibold text-yellow-700">📍 Full Goal Plan</h3>
@@ -113,7 +106,6 @@
         </div>
       </div>
 
-      <!-- Task Output -->
       <div id="taskSection" class="hidden">
         <div class="bg-indigo-50 p-4 rounded-xl border space-y-4 dark:bg-indigo-900">
           <h3 class="text-lg font-semibold text-indigo-700">🧠 Today's Task</h3>
@@ -128,10 +120,8 @@
     </div>
   </main>
 
-  <!-- Footer -->
   <footer class="text-center text-xs text-gray-400 py-6">© 2025 GoalGuru.ai - Made in India 🇮🇳</footer>
 
-  <!-- JavaScript Logic -->
   <script>
     function hideSplash() {
       const splash = document.getElementById("splashScreen");
@@ -163,18 +153,38 @@
       const gender = localStorage.getItem("gender") || "";
 
       localStorage.setItem("goal", goal);
-      getRoadmap(goal, lang, name, age, gender);
+      localStorage.setItem("lang", lang);
+      localStorage.setItem("name", name);
+      localStorage.setItem("age", age);
+      localStorage.setItem("gender", gender);
 
       document.getElementById("loader").style.display = "flex";
-      const response = await fetch("/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ goal, lang, name, age, gender })
-      });
-      const { task } = await response.json();
-      localStorage.setItem("task", task);
-      localStorage.setItem("task_done", "no");
-      location.reload();
+
+      await getRoadmap(goal, lang, name, age, gender);
+
+      try {
+        const response = await fetch("/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ goal, lang, name, age, gender })
+        });
+        const { task } = await response.json();
+        localStorage.setItem("task", task);
+        localStorage.setItem("task_done", "no");
+
+        document.getElementById("taskText").innerText = task;
+        document.getElementById("taskSection").classList.remove("hidden");
+
+        document.getElementById("savedGoalText").innerText = goal;
+        document.getElementById("savedLangText").innerText = lang;
+        document.getElementById("savedInfo").classList.remove("hidden");
+
+      } catch (err) {
+        console.error("Error fetching task", err);
+        alert("❌ Something went wrong");
+      }
+
+      document.getElementById("loader").style.display = "none";
     };
 
     function toggleDarkMode() {
@@ -186,8 +196,24 @@
       if (localStorage.getItem("darkmode") === "yes") {
         document.documentElement.classList.add("dark");
       }
-      setTimeout(hideSplash, 7000); // Fallback hide
+
+      const goal = localStorage.getItem("goal");
+      const task = localStorage.getItem("task");
+      const lang = localStorage.getItem("lang");
+
+      if (goal) {
+        document.getElementById("savedGoalText").innerText = goal;
+        document.getElementById("savedLangText").innerText = lang || "english";
+        document.getElementById("savedInfo").classList.remove("hidden");
+      }
+
+      if (task) {
+        document.getElementById("taskText").innerText = task;
+        document.getElementById("taskSection").classList.remove("hidden");
+      }
+
+      setTimeout(hideSplash, 6000);
     };
   </script>
 </body>
-        </html>
+</html>
