@@ -11,15 +11,14 @@
 </head>
 <body class="bg-gradient-to-br from-indigo-100 via-white to-pink-100 min-h-screen font-sans">
 
-  <!-- Splash Screen (Full Screen Video) -->
+  <!-- Splash Screen -->
   <div id="splashScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-black">
     <video autoplay muted playsinline onended="hideSplash()" class="w-full h-full object-cover">
       <source src="/static/splash.mp4" type="video/mp4">
-      Your browser does not support the video tag.
     </video>
   </div>
 
-  <!-- Loading Animation -->
+  <!-- Loader -->
   <div id="loader" class="fixed inset-0 z-40 flex items-center justify-center bg-white bg-opacity-90">
     <div class="flex flex-col items-center gap-2">
       <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
@@ -27,7 +26,7 @@
     </div>
   </div>
 
-  <!-- Navbar -->
+  <!-- Header -->
   <header class="bg-indigo-600 text-white py-4 shadow-md sticky top-0 z-30">
     <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
       <h1 class="text-2xl font-bold">🎯 GoalGuru</h1>
@@ -47,6 +46,7 @@
     <div class="bg-white shadow-2xl rounded-3xl p-8 w-full space-y-6 border border-gray-200">
       <p class="text-center text-gray-600 text-sm sm:text-base">Your desi AI accountability buddy</p>
 
+      <!-- Saved Info -->
       <div id="savedInfo" class="hidden bg-gray-50 p-4 rounded-xl text-sm border border-gray-200 space-y-2">
         <p class="text-gray-700"><strong>Your Goal:</strong> <span id="savedGoalText"></span></p>
         <p class="text-gray-700"><strong>Language:</strong> <span id="savedLangText"></span></p>
@@ -57,14 +57,15 @@
         <p id="encourage" class="text-green-600 font-medium pt-2 text-sm hidden">🔥 You're on fire! Keep going!</p>
       </div>
 
-      <form method="POST" id="goalForm" class="space-y-4" onsubmit="showLoader()">
+      <!-- Goal Form -->
+      <form id="goalForm" class="space-y-4" onsubmit="handleGoalSubmit(event)">
         <div>
           <label class="block text-sm font-medium text-gray-700">Your Goal:</label>
-          <textarea name="goal" id="goalInput" required placeholder="I want to become rich" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3"></textarea>
+          <textarea id="goalInput" required placeholder="I want to become rich" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3"></textarea>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Preferred Language:</label>
-          <select name="lang" id="langInput" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3">
+          <select id="langInput" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3">
             <option value="english">English</option>
             <option value="hindi">हिंदी</option>
             <option value="marathi">मराठी</option>
@@ -75,27 +76,31 @@
         </button>
       </form>
 
+      <!-- Task Section -->
       <div id="taskSection" class="hidden">
-        <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 mt-6" id="taskBox">
+        <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 mt-6">
           <h3 class="text-lg font-semibold text-indigo-700 mb-2">🧠 Today's Task</h3>
           <p class="text-gray-800" id="taskText"></p>
           <div class="mt-4 flex flex-col sm:flex-row gap-3">
             <button onclick="markCompleted()" class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-3 rounded">✅ Mark as Done</button>
             <button onclick="deleteGoal()" class="bg-red-500 hover:bg-red-600 text-white text-sm py-2 px-3 rounded">🗑️ Delete Goal</button>
           </div>
-          <button onclick="generateNewTask()" id="newTaskBtn" class="hidden mt-4 bg-indigo-600 text-white text-sm py-2 px-3 rounded hover:bg-indigo-700">🎯 Get New Task</button>
+          <button id="newTaskBtn" onclick="generateNewTask()" class="hidden mt-4 bg-indigo-600 text-white text-sm py-2 px-3 rounded hover:bg-indigo-700">🎯 Get Today's AI Task</button>
         </div>
         <div id="tauntBox" class="text-center text-red-600 text-sm font-medium mt-4"></div>
       </div>
 
+      <!-- Calendar -->
       <div id="calendar" class="mt-6 hidden text-center">
         <p class="text-lg font-bold text-gray-700">📅 Progress Calendar (Coming Soon)</p>
       </div>
     </div>
   </main>
 
+  <!-- Footer -->
   <footer class="text-center text-xs text-gray-400 py-6">© 2025 GoalGuru.ai - Made in India 🇮🇳</footer>
 
+  <!-- JavaScript -->
   <script>
     const tasks = [
       "Complete 1 step toward your goal today!",
@@ -112,6 +117,16 @@
       "Tu kare ya main karu? 😠"
     ];
 
+    function scrollToSection(id) {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function hideSplash() {
+      const splash = document.getElementById("splashScreen");
+      splash.classList.add("opacity-0", "transition-opacity", "duration-700");
+      setTimeout(() => splash.remove(), 700);
+    }
+
     function getUniqueItem(array, key) {
       const history = JSON.parse(localStorage.getItem(key) || "[]");
       const available = array.filter(item => !history.includes(item));
@@ -125,18 +140,29 @@
       return choice;
     }
 
-    function scrollToSection(id) {
-      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    function handleGoalSubmit(e) {
+      e.preventDefault();
+      const goal = document.getElementById("goalInput").value.trim();
+      const lang = document.getElementById("langInput").value;
+      if (!goal || !lang) return;
+
+      localStorage.setItem("goal", goal);
+      localStorage.setItem("lang", lang);
+      localStorage.setItem("progress", "0");
+      localStorage.setItem("task_done", "no");
+      generateNewTask();
     }
 
-    function showLoader() {
-      document.getElementById("loader").style.display = "flex";
-    }
+    function generateNewTask() {
+      const newTask = getUniqueItem(tasks, "task_history");
+      localStorage.setItem("task", newTask);
+      localStorage.setItem("task_done", "no");
 
-    function hideSplash() {
-      const splash = document.getElementById("splashScreen");
-      splash.classList.add("opacity-0", "transition-opacity", "duration-700");
-      setTimeout(() => splash.remove(), 700);
+      document.getElementById("taskText").innerText = newTask;
+      document.getElementById("taskSection").classList.remove("hidden");
+      document.getElementById("newTaskBtn").classList.add("hidden");
+      document.getElementById("submitBtn").disabled = true;
+      document.getElementById("submitBtn").innerText = "⚠️ Complete current task first!";
     }
 
     function markCompleted() {
@@ -159,13 +185,6 @@
     function showTaunt() {
       const msg = getUniqueItem(taunts, "taunt_history");
       document.getElementById("tauntBox").innerText = msg;
-    }
-
-    function generateNewTask() {
-      const newTask = getUniqueItem(tasks, "task_history");
-      localStorage.setItem("task", newTask);
-      localStorage.setItem("task_done", "no");
-      location.reload();
     }
 
     window.onload = function () {
@@ -211,6 +230,5 @@
       setTimeout(hideSplash, 6000);
     };
   </script>
-
 </body>
 </html>
