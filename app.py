@@ -10,6 +10,7 @@ load_dotenv()
 app = Flask(__name__)
 API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
+# 🎯 Task generator function
 def generate_ai_task(user_goal, lang, name=None, age=None, gender=None):
     headers = {
         "Authorization": f"Bearer {API_KEY}",
@@ -18,7 +19,6 @@ def generate_ai_task(user_goal, lang, name=None, age=None, gender=None):
 
     today = datetime.now().strftime("%Y-%m-%d")
 
-    # Identity block for personalization
     identity = ""
     if name:
         identity += f"User: {name}\n"
@@ -40,8 +40,14 @@ Use slang only for young males. No fluff. No repetition.
         "model": "deepseek-chat",
         "temperature": 0.7,
         "messages": [
-            {"role": "system", "content": "You are GoalGuru, a savage Indian accountability AI. You give desi, funny, blunt advice in Hinglish."},
-            {"role": "user", "content": prompt}
+            {
+                "role": "system",
+                "content": "You are GoalGuru, a savage Indian accountability AI. You give desi, funny, blunt advice in Hinglish."
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
         ]
     }
 
@@ -60,25 +66,31 @@ Use slang only for young males. No fluff. No repetition.
         app.logger.error("❌ DeepSeek API Error: %s", e)
         return "⚠️ Unable to fetch task. Please try again later."
 
-# 🏠 Main Home Page (index.html)
-@app.route("/", methods=["GET", "POST"])
+# 🏠 Home Route
+@app.route("/", methods=["GET"])
 def home():
-    task = None
-    if request.method == "POST":
-        goal = request.form.get("goal", "").strip()
-        lang = request.form.get("lang", "").strip().lower()
-        name = request.form.get("name", "").strip()
-        age = request.form.get("age", "").strip()
-        gender = request.form.get("gender", "").strip().lower()
+    return render_template("index.html")
 
-        if goal and lang:
-            task = generate_ai_task(goal, lang, name=name, age=age, gender=gender)
-    return render_template("index.html", task=task)
-
-# ⚙️ Settings Page (settings.html)
+# ⚙️ Settings Route
 @app.route("/settings", methods=["GET"])
 def settings():
     return render_template("settings.html")
 
+# 🔥 Generate Task API (POST handler)
+@app.route("/generate", methods=["POST"])
+def generate():
+    goal = request.form.get("goal", "").strip()
+    lang = request.form.get("lang", "").strip()
+    name = request.form.get("name", "").strip()
+    age = request.form.get("age", "").strip()
+    gender = request.form.get("gender", "").strip()
+
+    if not goal or not lang:
+        return {"task": "⚠️ Goal and language are required."}, 400
+
+    task = generate_ai_task(goal, lang, name, age, gender)
+    return {"task": task}
+
+# ▶️ Run app
 if __name__ == "__main__":
     app.run(debug=True)
