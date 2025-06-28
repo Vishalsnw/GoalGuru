@@ -10,13 +10,23 @@
 
     #customToast {
       opacity: 0;
-      transform: translateY(20px);
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.95);
       transition: opacity 0.5s ease, transform 0.5s ease;
+      background-color: #16a34a;
+      color: white;
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      border-radius: 0.75rem;
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+      z-index: 9999;
     }
 
     #customToast.show {
       opacity: 1;
-      transform: translateY(0);
+      transform: translate(-50%, -50%) scale(1);
     }
 
     .dark body { background-color: #1a202c; color: white; }
@@ -30,9 +40,7 @@
 <body class="bg-gradient-to-br from-indigo-100 via-white to-pink-100 min-h-screen font-sans transition-colors duration-300">
 
   <!-- ✅ Toast -->
-  <div id="customToast" class="fixed bottom-6 right-6 bg-green-600 text-white text-sm font-medium px-4 py-3 rounded-lg shadow-lg z-50">
-    ✅ Progress saved!
-  </div>
+  <div id="customToast">✅ Progress saved!</div>
 
   <!-- 🔥 Splash Screen -->
   <div id="splashScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-black">
@@ -72,6 +80,7 @@
     <div class="bg-white shadow-2xl rounded-3xl p-8 space-y-6 border border-gray-200 dark:border-gray-700">
       <p class="text-center text-gray-600 text-sm sm:text-base dark:text-gray-300">Your desi AI accountability buddy</p>
 
+      <!-- Saved Info -->
       <div id="savedInfo" class="hidden bg-gray-50 p-4 rounded-xl text-sm border space-y-2 dark:bg-gray-800">
         <p><strong>Your Goal:</strong> <span id="savedGoalText"></span></p>
         <p><strong>Language:</strong> <span id="savedLangText"></span></p>
@@ -82,6 +91,7 @@
         <p id="encourage" class="text-green-600 font-medium text-sm hidden">🔥 You're on fire!</p>
       </div>
 
+      <!-- Goal Form -->
       <form id="goalForm" class="space-y-4">
         <div>
           <label class="block text-sm font-medium">Your Goal:</label>
@@ -92,6 +102,7 @@
         </button>
       </form>
 
+      <!-- Task Section -->
       <div id="taskSection" class="hidden">
         <div class="bg-indigo-50 p-4 rounded-xl border space-y-4 dark:bg-indigo-900">
           <h3 class="text-lg font-semibold text-indigo-700">🧠 Today's Task</h3>
@@ -106,8 +117,10 @@
     </div>
   </main>
 
+  <!-- Footer -->
   <footer class="text-center text-xs text-gray-400 py-6">© 2025 GoalGuru.ai - Made in India 🇮🇳</footer>
 
+  <!-- Script -->
   <script>
     function getUserTone() {
       const gender = localStorage.getItem("gender") || "male";
@@ -170,6 +183,7 @@
       localStorage.setItem("task_done", "yes");
 
       const toast = document.getElementById("customToast");
+      toast.textContent = `✅ Progress: ${progress}/30`;
       toast.classList.add("show");
 
       setTimeout(() => {
