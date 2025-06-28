@@ -215,5 +215,138 @@
       setTimeout(hideSplash, 6000);
     };
   </script>
+  <script>
+  function hideSplash() {
+    const splash = document.getElementById("splashScreen");
+    splash.classList.add("opacity-0", "transition-opacity", "duration-700");
+    setTimeout(() => splash.remove(), 700);
+  }
+
+  async function getRoadmap(goal, lang, name, age, gender) {
+    try {
+      const res = await fetch("/roadmap", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ goal, lang, name, age, gender })
+      });
+      const data = await res.json();
+      document.getElementById("roadmapText").innerText = data.roadmap;
+      document.getElementById("roadmapSection").classList.remove("hidden");
+    } catch (err) {
+      console.error("Failed to fetch roadmap", err);
+    }
+  }
+
+  document.getElementById("goalForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const goal = goalInput.value.trim();
+    const lang = localStorage.getItem("lang") || "english";
+    const name = localStorage.getItem("name") || "";
+    const age = localStorage.getItem("age") || "";
+    const gender = localStorage.getItem("gender") || "";
+
+    localStorage.setItem("goal", goal);
+    localStorage.setItem("lang", lang);
+    localStorage.setItem("name", name);
+    localStorage.setItem("age", age);
+    localStorage.setItem("gender", gender);
+
+    document.getElementById("loader").style.display = "flex";
+
+    await getRoadmap(goal, lang, name, age, gender);
+
+    try {
+      const response = await fetch("/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ goal, lang, name, age, gender })
+      });
+      const { task } = await response.json();
+      localStorage.setItem("task", task);
+      localStorage.setItem("task_done", "no");
+
+      document.getElementById("taskText").innerText = task;
+      document.getElementById("taskSection").classList.remove("hidden");
+
+      document.getElementById("savedGoalText").innerText = goal;
+      document.getElementById("savedLangText").innerText = lang;
+      document.getElementById("savedInfo").classList.remove("hidden");
+    } catch (err) {
+      console.error("Error fetching task", err);
+      alert("❌ Something went wrong");
+    }
+
+    document.getElementById("loader").style.display = "none";
+  };
+
+  function markCompleted() {
+    let done = localStorage.getItem("task_done");
+    if (done === "yes") return;
+
+    let count = parseInt(localStorage.getItem("progress") || "0");
+    count++;
+    localStorage.setItem("progress", count);
+    localStorage.setItem("task_done", "yes");
+
+    document.getElementById("progressCount").innerText = count;
+    document.getElementById("progressBar").style.width = (count / 30) * 100 + "%";
+    document.getElementById("customToast").classList.add("show");
+
+    if (count >= 10) {
+      document.getElementById("encourage").classList.remove("hidden");
+    }
+
+    setTimeout(() => {
+      document.getElementById("customToast").classList.remove("show");
+    }, 2500);
+  }
+
+  function deleteGoal() {
+    localStorage.removeItem("goal");
+    localStorage.removeItem("lang");
+    localStorage.removeItem("name");
+    localStorage.removeItem("age");
+    localStorage.removeItem("gender");
+    localStorage.removeItem("task");
+    localStorage.removeItem("task_done");
+    localStorage.removeItem("progress");
+    location.reload();
+  }
+
+  function toggleDarkMode() {
+    document.documentElement.classList.toggle("dark");
+    localStorage.setItem("darkmode", document.documentElement.classList.contains("dark") ? "yes" : "no");
+  }
+
+  window.onload = () => {
+    if (localStorage.getItem("darkmode") === "yes") {
+      document.documentElement.classList.add("dark");
+    }
+
+    const goal = localStorage.getItem("goal");
+    const task = localStorage.getItem("task");
+    const lang = localStorage.getItem("lang");
+    const progress = parseInt(localStorage.getItem("progress") || "0");
+
+    if (goal) {
+      document.getElementById("savedGoalText").innerText = goal;
+      document.getElementById("savedLangText").innerText = lang || "english";
+      document.getElementById("progressCount").innerText = progress;
+      document.getElementById("progressBar").style.width = (progress / 30) * 100 + "%";
+      document.getElementById("savedInfo").classList.remove("hidden");
+    }
+
+    if (task) {
+      document.getElementById("taskText").innerText = task;
+      document.getElementById("taskSection").classList.remove("hidden");
+    }
+
+    if (progress >= 10) {
+      document.getElementById("encourage").classList.remove("hidden");
+    }
+
+    setTimeout(hideSplash, 6000);
+  };
+  </script>
 </body>
 </html>
