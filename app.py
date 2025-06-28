@@ -9,7 +9,7 @@ load_dotenv()
 app = Flask(__name__)
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
-# DeepSeek API Integration
+# 🔥 DeepSeek API Task Generator
 def generate_ai_task(user_goal, lang):
     headers = {
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
@@ -23,21 +23,24 @@ Date: {today}
 User's goal: {user_goal}
 Preferred language: {lang}
 
-Generate a bold, actionable task to push the user toward their goal TODAY.
+Generate ONE unique, bold, actionable task to push the user toward their goal TODAY.
 
 Instructions:
-- Be sharp, to-the-point and practical.
-- Style like a desi best friend or strict parent (but don’t roast daily).
-- No repetition of jokes or generic lines.
-- Use only the chosen language.
-- No fluffy advice. Give a direct, doable task.
+- Use a desi tone like a savage best friend or strict parent.
+- Do NOT reuse previous jokes or repeat task types.
+- Strictly follow the preferred language.
+- No fluff. Give 1 direct and practical task.
+- Max 2 lines.
 """
 
     payload = {
         "model": "deepseek-chat",
         "temperature": 0.7,
         "messages": [
-            {"role": "system", "content": "You are a smart, desi accountability AI. You sound like a caring but savage Indian friend or elder. Use humour only occasionally. Always give 1 real, practical task."},
+            {
+                "role": "system",
+                "content": "You're GoalGuru, a tough-love Indian accountability AI. You give 1 clear, funny-yet-firm task to push users toward their goals."
+            },
             {"role": "user", "content": prompt}
         ]
     }
@@ -50,6 +53,7 @@ Instructions:
         print("❌ API Error:", e)
         return "⚠️ Unable to fetch task. Please try again later."
 
+# 🏠 Home Route
 @app.route("/", methods=["GET", "POST"])
 def home():
     task = None
