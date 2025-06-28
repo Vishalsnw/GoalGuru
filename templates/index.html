@@ -12,14 +12,6 @@
     .dark .text-gray-700, .dark .text-gray-600, .dark .text-gray-900 { color: #e2e8f0; }
     .dark .border-gray-200 { border-color: #4a5568; }
     .dark .bg-gray-50 { background-color: #2d3748; }
-    .dark textarea, .dark select, .dark input {
-      background-color: #2d3748;
-      color: #e2e8f0;
-      border-color: #4a5568;
-    }
-    .animate-bounce-slow {
-      animation: bounce 1.5s infinite;
-    }
   </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-100 via-white to-pink-100 min-h-screen font-sans transition-colors duration-300">
@@ -83,7 +75,7 @@
             <option value="marathi">मराठी</option>
           </select>
         </div>
-        <button id="actionBtn" type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105 animate-bounce-slow">
+        <button id="actionBtn" type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105">
           🔥 Get Today’s AI Task
         </button>
       </form>
@@ -105,9 +97,6 @@
   <footer class="text-center text-xs text-gray-400 py-6">© 2025 GoalGuru.ai - Made in India 🇮🇳</footer>
 
   <script>
-    const form = document.getElementById("goalForm");
-    const actionBtn = document.getElementById("actionBtn");
-
     function scrollToSection(id) {
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     }
@@ -133,16 +122,14 @@
       document.open(); document.write(html); document.close();
     }
 
-    form.onsubmit = async (e) => {
+    document.getElementById("goalForm").onsubmit = async (e) => {
       e.preventDefault();
       const goal = goalInput.value.trim();
       const lang = langInput.value;
       if (!goal || !lang) return;
-
       localStorage.setItem("goal", goal);
       localStorage.setItem("lang", lang);
       localStorage.setItem("task_done", "no");
-
       await generateTask(goal, lang);
     }
 
@@ -162,8 +149,9 @@
     }
 
     window.onload = () => {
-      const darkmode = localStorage.getItem("darkmode");
-      if (darkmode === "yes") document.documentElement.classList.add("dark");
+      if (localStorage.getItem("darkmode") === "yes") {
+        document.documentElement.classList.add("dark");
+      }
 
       const goal = localStorage.getItem("goal");
       const lang = localStorage.getItem("lang");
@@ -184,10 +172,15 @@
         if (progress >= 3) encourage.classList.remove("hidden");
       }
 
-      if (finalTask) {
-        taskText.innerText = finalTask;
+      if (flaskTask) {
+        localStorage.setItem("task", flaskTask);
+        localStorage.setItem("task_done", "no");
+      }
+
+      const taskToShow = localStorage.getItem("task");
+      if (taskToShow) {
+        taskText.innerText = taskToShow;
         taskSection.classList.remove("hidden");
-        localStorage.setItem("task", finalTask);
       }
 
       if (done === "no") {
@@ -208,9 +201,16 @@
     }
 
     function showTaunt() {
-      const taunts = ["Bhai task toh complete kar! 😑", "Bas goal set kiya?", "AI bhi soch raha 🤨", "Leke kya aya reh gya?", "Ho gaya ab nahi?"];
+      const taunts = [
+        "Bhai task toh complete kar! 😑",
+        "Bas goal set kiya?",
+        "AI bhi soch raha 🤨",
+        "Leke kya aya reh gya?",
+        "Ho gaya ab nahi?"
+      ];
       tauntBox.innerText = taunts[Math.floor(Math.random() * taunts.length)];
     }
   </script>
 </body>
-</html>
+  </html>
+  
