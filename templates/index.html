@@ -8,26 +8,29 @@
   <style>
     #loader { display: none; }
 
-    #customToast {
+    #customToast, #reminderToast {
       opacity: 0;
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) scale(0.95);
       transition: opacity 0.5s ease, transform 0.5s ease;
-      background-color: #16a34a;
-      color: white;
       padding: 1rem 1.5rem;
       font-weight: 600;
       border-radius: 0.75rem;
       box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
       z-index: 9999;
+      text-align: center;
+      max-width: 80%;
     }
 
-    #customToast.show {
+    #customToast.show, #reminderToast.show {
       opacity: 1;
       transform: translate(-50%, -50%) scale(1);
     }
+
+    #customToast { background-color: #16a34a; color: white; }
+    #reminderToast { background-color: #dc2626; color: white; }
 
     .dark body { background-color: #1a202c; color: white; }
     .dark .bg-white { background-color: #2d3748; }
@@ -41,6 +44,9 @@
 
   <!-- ✅ Toast -->
   <div id="customToast">✅ Progress saved!</div>
+
+  <!-- 🚨 Reminder Toast -->
+  <div id="reminderToast"></div>
 
   <!-- 🔥 Splash Screen -->
   <div id="splashScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-black">
@@ -136,8 +142,38 @@
         "didi": ["Didi, task chhod diya kya? 😶", "Goal likh ke bhool gayi kya?", "AI bhi confuse ho gaya 🤨"],
         "sir/madam": ["Sir/Madam, aap se yeh umeed nahi thi 😅", "Thoda discipline dikhaiye 🙏"]
       };
-      const list = taunts[tone];
-      document.getElementById("tauntBox").innerText = list[Math.floor(Math.random() * list.length)];
+      document.getElementById("tauntBox").innerText = taunts[tone][Math.floor(Math.random() * taunts[tone].length)];
+    }
+
+    function showReminder(text) {
+      const box = document.getElementById("reminderToast");
+      box.textContent = text;
+      box.classList.add("show");
+      setTimeout(() => box.classList.remove("show"), 4000);
+    }
+
+    function getReminderRoast() {
+      const tone = getUserTone();
+      const reminders = {
+        "bhai": ["Bhai task bhool gaya kya? 🔔", "Uth ja bhai, kaam kar! 😤"],
+        "didi": ["Didi, time nikal gaya... task yaad hai? 😶", "AI intezaar kar raha 😅"],
+        "sir/madam": ["Sir/Madam, task pending hai. 🙏", "Thoda progress bhi kar lijiye 😊"]
+      };
+      return reminders[tone][Math.floor(Math.random() * reminders[tone].length)];
+    }
+
+    function scheduleReminder() {
+      const last = parseInt(localStorage.getItem("lastReminder") || "0");
+      const now = Date.now();
+      const diff = now - last;
+
+      const taskPending = localStorage.getItem("task") && localStorage.getItem("task_done") === "no";
+
+      if (taskPending && diff > 3600000) { // 1 hour
+        const reminder = getReminderRoast();
+        showReminder(reminder);
+        localStorage.setItem("lastReminder", now.toString());
+      }
     }
 
     function hideSplash() {
@@ -201,7 +237,8 @@
     }
 
     window.onload = () => {
-      if (localStorage.getItem("darkmode") === "yes") document.documentElement.classList.add("dark");
+      if (localStorage.getItem("darkmode") === "yes")
+        document.documentElement.classList.add("dark");
 
       const goal = localStorage.getItem("goal");
       const lang = localStorage.getItem("lang");
@@ -239,7 +276,8 @@
       }
 
       setTimeout(hideSplash, 6000);
+      scheduleReminder();
     };
   </script>
 </body>
-  </html>
+</html>
