@@ -54,11 +54,11 @@
     </div>
   </div>
 
-  <!-- header, menu, form, taskSection, roadmapSection, etc remain unchanged -->
-
   <script>
     function hideSplash() {
-      document.getElementById("splashScreen").classList.add("opacity-0", "transition-opacity", "duration-700");
+      const splash = document.getElementById("splashScreen");
+      if (!splash) return;
+      splash.classList.add("opacity-0", "transition-opacity", "duration-700");
       setTimeout(() => splash.remove(), 700);
     }
 
@@ -176,7 +176,7 @@
         document.getElementById("taskText").innerText = task;
         document.getElementById("taskSection").classList.remove("hidden");
       }
-      if (localStorage.getItem("roadmap_shown") === "yes") {
+      if (localStorage.getItem("roadmap_shown") !== "yes") {
         document.getElementById("roadmapSection").classList.add("hidden");
       }
       setTimeout(hideSplash, 6000);
