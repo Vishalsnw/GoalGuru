@@ -99,6 +99,13 @@
         </button>
       </form>
 
+      <div id="roadmapSection" class="hidden">
+        <div class="bg-yellow-50 p-4 rounded-xl border space-y-3 dark:bg-yellow-900">
+          <h3 class="text-lg font-semibold text-yellow-700">📍 Full Goal Plan</h3>
+          <pre id="roadmapText" class="whitespace-pre-wrap bg-white p-3 rounded-xl border dark:bg-gray-800 dark:text-white"></pre>
+        </div>
+      </div>
+
       <div id="taskSection" class="hidden">
         <div class="bg-indigo-50 p-4 rounded-xl border space-y-4 dark:bg-indigo-900">
           <h3 class="text-lg font-semibold text-indigo-700">🧠 Today's Task</h3>
@@ -116,7 +123,46 @@
   <footer class="text-center text-xs text-gray-400 py-6">© 2025 GoalGuru.ai - Made in India 🇮🇳</footer>
 
   <script>
-    // ... full JS logic remains the same as in your shared code
+    async function getRoadmap(goal, lang, name, age, gender) {
+      try {
+        const res = await fetch("/roadmap", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ goal, lang, name, age, gender })
+        });
+        const data = await res.json();
+        document.getElementById("roadmapText").innerText = data.roadmap;
+        document.getElementById("roadmapSection").classList.remove("hidden");
+      } catch (err) {
+        console.error("Failed to fetch roadmap", err);
+      }
+    }
+
+    document.getElementById("goalForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const goal = goalInput.value.trim();
+      const lang = localStorage.getItem("lang") || "english";
+      const name = localStorage.getItem("name") || "";
+      const age = localStorage.getItem("age") || "";
+      const gender = localStorage.getItem("gender") || "";
+
+      localStorage.setItem("goal", goal);
+
+      // Fetch roadmap and task in parallel
+      getRoadmap(goal, lang, name, age, gender);
+
+      document.getElementById("loader").style.display = "flex";
+      const response = await fetch("/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ goal, lang, name, age, gender })
+      });
+      const { task } = await response.json();
+      localStorage.setItem("task", task);
+      localStorage.setItem("task_done", "no");
+      location.reload();
+    };
   </script>
 </body>
-</html>
+          </html>
+        
