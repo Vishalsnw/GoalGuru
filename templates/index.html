@@ -7,9 +7,14 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     #loader { display: none; }
+    .dark body { background-color: #1a202c; color: white; }
+    .dark .bg-white { background-color: #2d3748; }
+    .dark .text-gray-700, .dark .text-gray-600, .dark .text-gray-900 { color: #e2e8f0; }
+    .dark .border-gray-200 { border-color: #4a5568; }
+    .dark .bg-gray-50 { background-color: #2d3748; }
   </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-100 via-white to-pink-100 min-h-screen font-sans">
+<body class="bg-gradient-to-br from-indigo-100 via-white to-pink-100 min-h-screen font-sans transition-colors duration-300">
 
   <!-- Splash Screen -->
   <div id="splashScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-black">
@@ -19,7 +24,7 @@
   </div>
 
   <!-- Loader -->
-  <div id="loader" class="fixed inset-0 z-40 flex items-center justify-center bg-white bg-opacity-90">
+  <div id="loader" class="fixed inset-0 z-40 flex items-center justify-center bg-white bg-opacity-90 dark:bg-black dark:bg-opacity-90">
     <div class="flex flex-col items-center gap-2">
       <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
       <p class="text-indigo-600 text-sm font-medium mt-2">Generating your AI task...</p>
@@ -30,37 +35,40 @@
   <header class="bg-indigo-600 text-white py-4 shadow-md sticky top-0 z-30">
     <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
       <h1 class="text-2xl font-bold">🎯 GoalGuru</h1>
-      <div class="relative group">
-        <button class="text-sm font-medium hover:underline">☰ Menu</button>
-        <div class="absolute right-0 mt-2 hidden group-hover:block bg-white text-gray-700 shadow-lg rounded-md overflow-hidden z-20">
-          <button class="w-full px-4 py-2 text-sm hover:bg-indigo-100" onclick="scrollToSection('goalForm')">Set Goal</button>
-          <button class="w-full px-4 py-2 text-sm hover:bg-indigo-100" onclick="scrollToSection('savedInfo')">Progress</button>
+      <div class="flex items-center gap-4">
+        <button onclick="toggleDarkMode()" class="text-sm font-medium bg-white text-indigo-600 px-2 py-1 rounded">🌓</button>
+        <div class="relative group">
+          <button class="text-sm font-medium hover:underline">☰ Menu</button>
+          <div class="absolute right-0 mt-2 hidden group-hover:block bg-white text-gray-700 shadow-lg rounded-md overflow-hidden z-20 dark:bg-gray-800">
+            <button class="w-full px-4 py-2 text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900" onclick="scrollToSection('goalForm')">Set Goal</button>
+            <button class="w-full px-4 py-2 text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900" onclick="scrollToSection('savedInfo')">Progress</button>
+          </div>
         </div>
       </div>
     </div>
   </header>
 
   <main class="max-w-2xl mx-auto px-4 py-10">
-    <div class="bg-white shadow-2xl rounded-3xl p-8 space-y-6 border border-gray-200">
-      <p class="text-center text-gray-600 text-sm sm:text-base">Your desi AI accountability buddy</p>
+    <div class="bg-white shadow-2xl rounded-3xl p-8 space-y-6 border border-gray-200 dark:border-gray-700">
+      <p class="text-center text-gray-600 text-sm sm:text-base dark:text-gray-300">Your desi AI accountability buddy</p>
 
-      <div id="savedInfo" class="hidden bg-gray-50 p-4 rounded-xl text-sm border space-y-2">
+      <div id="savedInfo" class="hidden bg-gray-50 p-4 rounded-xl text-sm border space-y-2 dark:bg-gray-800">
         <p><strong>Your Goal:</strong> <span id="savedGoalText"></span></p>
         <p><strong>Language:</strong> <span id="savedLangText"></span></p>
         <p><strong>Progress:</strong> <span id="progressCount">0</span>/30</p>
-        <div class="w-full bg-gray-200 rounded-full h-3">
+        <div class="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-600">
           <div id="progressBar" class="bg-indigo-500 h-3 rounded-full" style="width: 0%"></div>
         </div>
         <p id="encourage" class="text-green-600 font-medium text-sm hidden">🔥 You're on fire!</p>
       </div>
 
-      <form id="goalForm" class="space-y-4" onsubmit="handleGoalSubmit(event)">
+      <form id="goalForm" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700">Your Goal:</label>
+          <label class="block text-sm font-medium">Your Goal:</label>
           <textarea id="goalInput" required placeholder="I want to become rich" class="mt-1 block w-full rounded-lg border p-3"></textarea>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700">Preferred Language:</label>
+          <label class="block text-sm font-medium">Preferred Language:</label>
           <select id="langInput" required class="mt-1 block w-full rounded-lg border p-3">
             <option value="english">English</option>
             <option value="hindi">हिंदी</option>
@@ -73,9 +81,9 @@
       </form>
 
       <div id="taskSection" class="hidden">
-        <div class="bg-indigo-50 p-4 rounded-xl border space-y-4">
+        <div class="bg-indigo-50 p-4 rounded-xl border space-y-4 dark:bg-indigo-900">
           <h3 class="text-lg font-semibold text-indigo-700">🧠 Today's Task</h3>
-          <blockquote id="taskText" class="italic p-4 bg-white rounded-xl shadow border-l-4 border-indigo-500"></blockquote>
+          <blockquote id="taskText" class="italic p-4 bg-white rounded-xl shadow border-l-4 border-indigo-500 dark:bg-gray-800"></blockquote>
           <div class="flex gap-3">
             <button onclick="markCompleted()" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">✅ Mark Done</button>
             <button onclick="deleteGoal()" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">🗑️ Reset</button>
@@ -89,6 +97,9 @@
   <footer class="text-center text-xs text-gray-400 py-6">© 2025 GoalGuru.ai - Made in India 🇮🇳</footer>
 
   <script>
+    const form = document.getElementById("goalForm");
+    const actionBtn = document.getElementById("actionBtn");
+
     function scrollToSection(id) {
       document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     }
@@ -98,24 +109,32 @@
       setTimeout(() => document.getElementById("splashScreen").remove(), 700);
     }
 
-    async function handleGoalSubmit(e) {
-      e.preventDefault();
-      const goal = goalInput.value.trim();
-      const lang = langInput.value;
-      if (!goal || !lang) return;
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle("dark");
+      localStorage.setItem("darkmode", document.documentElement.classList.contains("dark") ? "yes" : "no");
+    }
 
-      document.getElementById("loader").style.display = "flex";
-      // Save generically to localStorage
-      localStorage.setItem("goal", goal);
-      localStorage.setItem("lang", lang);
-
-      const resp = await fetch("/", {
+    async function generateTask(goal, lang) {
+      const loader = document.getElementById("loader");
+      loader.style.display = "flex";
+      const response = await fetch("/", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `goal=${encodeURIComponent(goal)}&lang=${encodeURIComponent(lang)}`
       });
-      const html = await resp.text();
+      const html = await response.text();
       document.open(); document.write(html); document.close();
+    }
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const goal = goalInput.value.trim();
+      const lang = langInput.value;
+      if (!goal || !lang) return;
+      localStorage.setItem("goal", goal);
+      localStorage.setItem("lang", lang);
+      localStorage.setItem("task_done", "no");
+      await generateTask(goal, lang);
     }
 
     function markCompleted() {
@@ -134,9 +153,14 @@
     }
 
     window.onload = () => {
+      const darkmode = localStorage.getItem("darkmode");
+      if (darkmode === "yes") document.documentElement.classList.add("dark");
+
       const goal = localStorage.getItem("goal");
       const lang = localStorage.getItem("lang");
-      const task = {{ task|tojson|default('null') }};
+      const flaskTask = {{ task|tojson|default('null') }};
+      const savedTask = localStorage.getItem("task");
+      const finalTask = flaskTask || savedTask;
       const done = localStorage.getItem("task_done");
       const progress = parseInt(localStorage.getItem("progress") || 0);
 
@@ -144,18 +168,17 @@
         savedInfo.classList.remove("hidden");
         savedGoalText.innerText = goal;
         savedLangText.innerText = lang;
-        progressCount.innerText = progress;
-        progressBar.style.width = `${(progress/30)*100}%`;
-        if (progress >= 3) encourage.classList.remove("hidden");
         goalInput.value = goal;
         langInput.value = lang;
+        progressCount.innerText = progress;
+        progressBar.style.width = `${(progress / 30) * 100}%`;
+        if (progress >= 3) encourage.classList.remove("hidden");
       }
 
-      if (task) {
-        taskText.innerText = task;
+      if (finalTask) {
+        taskText.innerText = finalTask;
         taskSection.classList.remove("hidden");
-        localStorage.setItem("task", task);
-        localStorage.setItem("task_done", "no");
+        localStorage.setItem("task", finalTask);
       }
 
       if (done === "no") {
@@ -173,12 +196,12 @@
       }
 
       setTimeout(hideSplash, 6000);
-    };
+    }
 
     function showTaunt() {
       const taunts = ["Bhai task toh complete kar! 😑","Bas goal set kiya?","AI bhi soch raha 🤨","Leke kya aya reh gya?","Ho gaya ab nahi?"];
-      tauntBox.innerText = taunts[Math.floor(Math.random()*taunts.length)];
+      tauntBox.innerText = taunts[Math.floor(Math.random() * taunts.length)];
     }
   </script>
 </body>
-          </html>
+</html>
