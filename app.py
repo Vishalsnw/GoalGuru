@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 
-# 🔐 Load environment variables
+# 🔐 Load environment variables from .env file
 load_dotenv()
 
 app = Flask(__name__)
@@ -40,17 +40,26 @@ Instructions:
         "messages": [
             {
                 "role": "system",
-                "content": "You're GoalGuru, a tough-love Indian accountability AI. You give 1 clear, funny-yet-firm task to push users toward their goals."
+                "content": (
+                    "You're GoalGuru, a tough-love Indian accountability AI. "
+                    "You give 1 clear, funny-yet-firm task to push users toward their goals."
+                )
             },
             {"role": "user", "content": prompt}
         ]
     }
 
     try:
-        res = requests.post("https://api.deepseek.com/v1/chat/completions", headers=headers, json=payload, timeout=15)
-        res.raise_for_status()
-        task = res.json()["choices"][0]["message"]["content"].strip()
-        return task.replace("**", "").strip()  # Clean markdown bold formatting
+        response = requests.post(
+            "https://api.deepseek.com/v1/chat/completions",
+            headers=headers,
+            json=payload,
+            timeout=60
+        )
+        response.raise_for_status()
+        data = response.json()
+        task_text = data["choices"][0]["message"]["content"].strip()
+        return task_text.replace("**", "").strip()
     except Exception as e:
         print("❌ API Error:", e)
         return "⚠️ Unable to fetch task. Please try again later."
@@ -63,9 +72,9 @@ def home():
         user_goal = request.form.get("goal")
         lang = request.form.get("lang")
         if user_goal and lang:
-            task = generate_ai_task(user_goal, lang)
+            task = generate_ai_task(user_goal.strip(), lang.strip().lower())
     return render_template("index.html", task=task)
 
-# 🔁 Run Server
+# 🚀 Run Flask server
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
