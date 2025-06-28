@@ -68,6 +68,7 @@
           <div class="absolute right-0 mt-2 hidden group-hover:block bg-white text-gray-700 shadow-lg rounded-md overflow-hidden z-20 dark:bg-gray-800">
             <a href="#goalForm" class="block px-4 py-2 text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900">Set Goal</a>
             <a href="#savedInfo" class="block px-4 py-2 text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900">Progress</a>
+            <a href="javascript:void(0)" onclick="showGoalPlan()" class="block px-4 py-2 text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900">Goal Plan</a>
             <a href="/settings" class="block px-4 py-2 text-sm hover:bg-indigo-100 dark:hover:bg-indigo-900">Settings</a>
           </div>
         </div>
@@ -217,6 +218,15 @@
       localStorage.setItem("darkmode", document.documentElement.classList.contains("dark") ? "yes" : "no");
     }
 
+    function showGoalPlan() {
+      const roadmap = document.getElementById("roadmapSection");
+      if (!roadmap.classList.contains("hidden")) {
+        roadmap.scrollIntoView({ behavior: "smooth" });
+      } else {
+        alert("⚠️ Goal Plan is not available yet.\nPlease generate a goal first.");
+      }
+    }
+
     window.onload = () => {
       if (localStorage.getItem("darkmode") === "yes") {
         document.documentElement.classList.add("dark");
@@ -248,4 +258,4 @@
     };
   </script>
 </body>
-</html>
+        </html>
