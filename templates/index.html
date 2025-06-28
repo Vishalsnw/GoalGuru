@@ -81,7 +81,7 @@
         <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 mt-6">
           <h3 class="text-lg font-semibold text-indigo-700 mb-3">🧠 Today's Task</h3>
           <blockquote id="taskText" class="text-base text-gray-900 font-medium bg-white p-4 rounded-xl shadow border-l-4 border-indigo-500 italic">
-            <!-- Task text injected by JS -->
+            <!-- Task content will appear here -->
           </blockquote>
           <div class="mt-4 flex flex-col sm:flex-row gap-3">
             <button onclick="markCompleted()" class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-3 rounded">✅ Mark as Done</button>
@@ -150,6 +150,7 @@
       localStorage.setItem("progress", progress);
       alert(`✅ Task marked as done! Progress: ${progress}/30`);
       document.getElementById("newTaskBtn").classList.remove("hidden");
+      document.getElementById("submitBtn").classList.add("hidden");
     }
 
     function deleteGoal() {
@@ -157,6 +158,12 @@
         localStorage.clear();
         location.reload();
       }
+    }
+
+    function generateNewTask() {
+      localStorage.removeItem("task");
+      localStorage.setItem("task_done", "no");
+      location.reload();
     }
 
     window.onload = function () {
@@ -197,15 +204,24 @@
       if (taskDone === "no") {
         document.getElementById("submitBtn").disabled = true;
         document.getElementById("submitBtn").innerText = "⚠️ Complete current task first!";
+        document.getElementById("newTaskBtn").classList.add("hidden");
         showTaunt();
       }
 
       if (taskDone === "yes") {
+        document.getElementById("submitBtn").classList.add("hidden");
         document.getElementById("newTaskBtn").classList.remove("hidden");
+      }
+
+      if (!savedTask) {
+        document.getElementById("submitBtn").classList.remove("hidden");
+        document.getElementById("submitBtn").disabled = false;
+        document.getElementById("submitBtn").innerText = "🔥 Get Today’s AI Task";
+        document.getElementById("newTaskBtn").classList.add("hidden");
       }
 
       setTimeout(hideSplash, 6000);
     };
   </script>
 </body>
-</html>
+  </html>
