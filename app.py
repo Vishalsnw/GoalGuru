@@ -18,7 +18,7 @@ def generate_ai_task(user_goal, lang, name=None, age=None, gender=None):
 
     today = datetime.now().strftime("%Y-%m-%d")
 
-    # Build user identity prefix
+    # Identity block for personalization
     identity = ""
     if name:
         identity += f"User: {name}\n"
@@ -31,16 +31,16 @@ def generate_ai_task(user_goal, lang, name=None, age=None, gender=None):
 Goal: {user_goal}
 Language: {lang}
 
-Give ONE bold, actionable task (max 2 lines). Use desi tough-love tone.
-Avoid saying 'same thing as yesterday'. Add roast if suitable but respectful if user is old or female.
-Use casual slang for young males. No fluff. No repetition.
+Give ONE bold, actionable task (max 2 lines). Desi savage tone.
+Avoid saying 'same as yesterday'. Add roast if user is young male. Be respectful if user is female or senior.
+Use slang only for young males. No fluff. No repetition.
 """
 
     payload = {
         "model": "deepseek-chat",
         "temperature": 0.7,
         "messages": [
-            {"role": "system", "content": "You are GoalGuru, a savage Indian accountability AI. You speak in Hinglish and use casual tone."},
+            {"role": "system", "content": "You are GoalGuru, a savage Indian accountability AI. You give desi, funny, blunt advice in Hinglish."},
             {"role": "user", "content": prompt}
         ]
     }
