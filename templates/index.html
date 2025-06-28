@@ -79,15 +79,13 @@
       <!-- Task Section -->
       <div id="taskSection" class="hidden">
         <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 mt-6">
-          <h3 class="text-lg font-semibold text-indigo-700 mb-3">🧠 Today's Task</h3>
-          <blockquote id="taskText" class="text-base text-gray-900 font-medium bg-white p-4 rounded-xl shadow border-l-4 border-indigo-500 italic">
-            <!-- Task content injected by JS -->
-          </blockquote>
+          <h3 class="text-lg font-semibold text-indigo-700 mb-2">🧠 Today's Task</h3>
+          <p class="text-gray-800" id="taskText"></p>
           <div class="mt-4 flex flex-col sm:flex-row gap-3">
             <button onclick="markCompleted()" class="bg-green-500 hover:bg-green-600 text-white text-sm py-2 px-3 rounded">✅ Mark as Done</button>
             <button onclick="deleteGoal()" class="bg-red-500 hover:bg-red-600 text-white text-sm py-2 px-3 rounded">🗑️ Delete Goal</button>
           </div>
-          <button id="newTaskBtn" onclick="generateNewTask()" class="hidden mt-4 bg-indigo-600 text-white text-sm py-2 px-3 rounded hover:bg-indigo-700">🎯 Get New Task</button>
+          <button id="newTaskBtn" onclick="generateNewTask()" class="hidden mt-4 bg-indigo-600 text-white text-sm py-2 px-3 rounded hover:bg-indigo-700">🎯 Get Today's AI Task</button>
         </div>
         <div id="tauntBox" class="text-center text-red-600 text-sm font-medium mt-4"></div>
       </div>
@@ -102,7 +100,7 @@
   <!-- Footer -->
   <footer class="text-center text-xs text-gray-400 py-6">© 2025 GoalGuru.ai - Made in India 🇮🇳</footer>
 
-  <!-- JavaScript -->
+  <!-- Scripts -->
   <script>
     const taunts = [
       "Bhai task toh complete kar! 😑",
@@ -135,10 +133,7 @@
       e.preventDefault();
       const goal = document.getElementById("goalInput").value.trim();
       const lang = document.getElementById("langInput").value;
-
       if (!goal || !lang) return;
-
-      document.getElementById("loader").style.display = "flex";
 
       fetch("/", {
         method: "POST",
@@ -153,7 +148,6 @@
       localStorage.setItem("progress", progress);
       alert(`✅ Task marked as done! Progress: ${progress}/30`);
       document.getElementById("newTaskBtn").classList.remove("hidden");
-      document.getElementById("submitBtn").classList.add("hidden");
     }
 
     function deleteGoal() {
@@ -161,12 +155,6 @@
         localStorage.clear();
         location.reload();
       }
-    }
-
-    function generateNewTask() {
-      localStorage.removeItem("task");
-      localStorage.setItem("task_done", "no");
-      location.reload();
     }
 
     window.onload = function () {
@@ -180,13 +168,11 @@
         document.getElementById("savedInfo").classList.remove("hidden");
         document.getElementById("savedGoalText").innerText = goal;
         document.getElementById("goalInput").value = goal;
-        localStorage.setItem("goal", goal);
       }
 
       if (lang) {
         document.getElementById("langInput").value = lang;
         document.getElementById("savedLangText").innerText = lang;
-        localStorage.setItem("lang", lang);
       }
 
       if (progress > 0) {
@@ -209,24 +195,16 @@
       if (taskDone === "no") {
         document.getElementById("submitBtn").disabled = true;
         document.getElementById("submitBtn").innerText = "⚠️ Complete current task first!";
-        document.getElementById("newTaskBtn").classList.add("hidden");
         showTaunt();
       }
 
       if (taskDone === "yes") {
-        document.getElementById("submitBtn").classList.add("hidden");
         document.getElementById("newTaskBtn").classList.remove("hidden");
-      }
-
-      if (!savedTask) {
-        document.getElementById("submitBtn").classList.remove("hidden");
-        document.getElementById("submitBtn").disabled = false;
-        document.getElementById("submitBtn").innerText = "🔥 Get Today’s AI Task";
-        document.getElementById("newTaskBtn").classList.add("hidden");
       }
 
       setTimeout(hideSplash, 6000);
     };
   </script>
 </body>
-  </html>
+            </html>
+  
