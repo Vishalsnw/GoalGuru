@@ -60,6 +60,7 @@ Use slang only for young males. No fluff. No repetition.
         app.logger.error("❌ DeepSeek API Error: %s", e)
         return "⚠️ Unable to fetch task. Please try again later."
 
+# 🏠 Main Home Page (index.html)
 @app.route("/", methods=["GET", "POST"])
 def home():
     task = None
@@ -73,6 +74,11 @@ def home():
         if goal and lang:
             task = generate_ai_task(goal, lang, name=name, age=age, gender=gender)
     return render_template("index.html", task=task)
+
+# ⚙️ Settings Page (settings.html)
+@app.route("/settings", methods=["GET"])
+def settings():
+    return render_template("settings.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
