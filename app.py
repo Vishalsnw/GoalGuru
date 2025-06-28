@@ -1,80 +1,41 @@
 from flask import Flask, render_template, request
-import requests
-import os
+import requests, os
 from dotenv import load_dotenv
 from datetime import datetime
 
-# 🔐 Load environment variables from .env file
 load_dotenv()
-
 app = Flask(__name__)
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
-# 🔥 Generate AI Task from DeepSeek
 def generate_ai_task(user_goal, lang):
-    headers = {
-        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
-        "Content-Type": "application/json"
-    }
-
+    headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
     today = datetime.now().strftime("%Y-%m-%d")
+    prompt = f"""Date: {today}
+Goal: {user_goal}
+Lang: {lang}
 
-    prompt = f"""
-Date: {today}
-User's goal: {user_goal}
-Preferred language: {lang}
-
-Generate ONE unique, bold, actionable task to push the user toward their goal TODAY.
-
-Instructions:
-- Use a desi tone like a savage best friend or strict parent.
-- Do NOT reuse previous jokes or repeat task types.
-- Strictly follow the preferred language.
-- No fluff. Give 1 direct and practical task.
-- Max 2 lines.
-"""
-
-    payload = {
-        "model": "deepseek-chat",
-        "temperature": 0.7,
-        "messages": [
-            {
-                "role": "system",
-                "content": (
-                    "You're GoalGuru, a tough-love Indian accountability AI. "
-                    "You give 1 clear, funny-yet-firm task to push users toward their goals."
-                )
-            },
-            {"role": "user", "content": prompt}
-        ]
-    }
-
+Give one bold, actionable task (max 2 lines). Desi tone. No repeats."""
+    payload = {"model":"deepseek-chat","temperature":0.7,
+               "messages":[{"role":"system","content":"You are GoalGuru, a desi tough-love AI."},
+                           {"role":"user","content":prompt}]}
     try:
-        response = requests.post(
-            "https://api.deepseek.com/v1/chat/completions",
-            headers=headers,
-            json=payload,
-            timeout=60
-        )
-        response.raise_for_status()
-        data = response.json()
-        task_text = data["choices"][0]["message"]["content"].strip()
-        return task_text.replace("**", "").strip()
+        resp = requests.post("https://api.deepseek.com/v1/chat/completions", headers=headers, json=payload, timeout=60)
+        resp.raise_for_status()
+        txt = resp.json()["choices"][0]["message"]["content"].strip().replace("**","").strip()
+        return txt
     except Exception as e:
-        print("❌ API Error:", e)
+        app.logger.error("DeepSeek error: %s", e)
         return "⚠️ Unable to fetch task. Please try again later."
 
-# 🏠 Home Route
-@app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["GET","POST"])
 def home():
     task = None
     if request.method == "POST":
-        user_goal = request.form.get("goal")
-        lang = request.form.get("lang")
-        if user_goal and lang:
-            task = generate_ai_task(user_goal.strip(), lang.strip().lower())
+        goal = request.form.get("goal","").strip()
+        lang = request.form.get("lang","").strip().lower()
+        if goal and lang:
+            task = generate_ai_task(goal, lang)
     return render_template("index.html", task=task)
 
-# 🚀 Run Flask server
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(debug=True)
