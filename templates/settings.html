@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings | GoalGuru.ai</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .dark body { background-color: #1a202c; color: white; }
+    .dark .bg-white { background-color: #2d3748; }
+    .dark .text-gray-700, .dark label { color: #e2e8f0; }
+    .dark .border-gray-200 { border-color: #4a5568; }
+    .dark .bg-gray-50 { background-color: #2d3748; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 via-white to-pink-100 min-h-screen font-sans transition-colors duration-300">
+  
+  <!-- Header -->
+  <header class="bg-indigo-600 text-white py-4 shadow-md sticky top-0 z-30">
+    <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold">🎯 GoalGuru</h1>
+      <div class="flex items-center gap-4">
+        <button onclick="toggleDarkMode()" class="text-sm font-medium bg-white text-indigo-600 px-2 py-1 rounded">🌓</button>
+        <a href="/" class="text-sm font-medium hover:underline">🏠 Home</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Settings Form -->
+  <main class="max-w-xl mx-auto px-4 py-10">
+    <div class="bg-white shadow-2xl rounded-3xl p-8 space-y-6 border border-gray-200 dark:border-gray-700">
+      <h2 class="text-xl font-semibold text-indigo-700 text-center">⚙️ Your Settings</h2>
+      <form id="settingsForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium">Your Name:</label>
+          <input id="userName" type="text" placeholder="e.g. Ramesh" class="mt-1 block w-full rounded-lg border p-3">
+        </div>
+        <div>
+          <label class="block text-sm font-medium">Age:</label>
+          <input id="userAge" type="number" placeholder="e.g. 25" class="mt-1 block w-full rounded-lg border p-3">
+        </div>
+        <div>
+          <label class="block text-sm font-medium">Gender:</label>
+          <select id="userGender" class="mt-1 block w-full rounded-lg border p-3">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium">Preferred Language:</label>
+          <select id="langInput" class="mt-1 block w-full rounded-lg border p-3">
+            <option value="english">English</option>
+            <option value="hindi">हिंदी</option>
+            <option value="marathi">मराठी</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105">
+          💾 Save Settings
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <footer class="text-center text-xs text-gray-400 py-6">© 2025 GoalGuru.ai - Made in India 🇮🇳</footer>
+
+  <script>
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle("dark");
+      localStorage.setItem("darkmode", document.documentElement.classList.contains("dark") ? "yes" : "no");
+    }
+
+    // Populate settings from localStorage
+    window.onload = () => {
+      if (localStorage.getItem("darkmode") === "yes") document.documentElement.classList.add("dark");
+      ["name", "age", "gender", "lang"].forEach(key => {
+        const val = localStorage.getItem(key);
+        if (val) {
+          const id = key === "lang" ? "langInput" : `user${key.charAt(0).toUpperCase() + key.slice(1)}`;
+          document.getElementById(id).value = val;
+        }
+      });
+    };
+
+    document.getElementById("settingsForm").onsubmit = (e) => {
+      e.preventDefault();
+      localStorage.setItem("name", document.getElementById("userName").value.trim());
+      localStorage.setItem("age", document.getElementById("userAge").value.trim());
+      localStorage.setItem("gender", document.getElementById("userGender").value);
+      localStorage.setItem("lang", document.getElementById("langInput").value);
+      alert("✅ Settings saved!");
+      window.location.href = "/";
+    };
+  </script>
+</body>
+</html>
