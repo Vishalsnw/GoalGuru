@@ -4,12 +4,13 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 
+# 🔐 Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
-# 🔥 DeepSeek API Task Generator
+# 🔥 Generate AI Task from DeepSeek
 def generate_ai_task(user_goal, lang):
     headers = {
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
@@ -48,7 +49,8 @@ Instructions:
     try:
         res = requests.post("https://api.deepseek.com/v1/chat/completions", headers=headers, json=payload, timeout=15)
         res.raise_for_status()
-        return res.json()["choices"][0]["message"]["content"].strip()
+        task = res.json()["choices"][0]["message"]["content"].strip()
+        return task.replace("**", "").strip()  # Clean markdown bold formatting
     except Exception as e:
         print("❌ API Error:", e)
         return "⚠️ Unable to fetch task. Please try again later."
@@ -64,5 +66,6 @@ def home():
             task = generate_ai_task(user_goal, lang)
     return render_template("index.html", task=task)
 
+# 🔁 Run Server
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
