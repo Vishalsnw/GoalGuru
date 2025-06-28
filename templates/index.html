@@ -100,15 +100,8 @@
   <!-- Footer -->
   <footer class="text-center text-xs text-gray-400 py-6">© 2025 GoalGuru.ai - Made in India 🇮🇳</footer>
 
-  <!-- JavaScript -->
+  <!-- Scripts -->
   <script>
-    const tasks = [
-      "Complete 1 step toward your goal today!",
-      "Read something new related to your goal.",
-      "Write 100 words about your progress.",
-      "Talk to someone about your dream.",
-      "Watch 1 inspiring video related to your field."
-    ];
     const taunts = [
       "Bhai task toh complete kar! 😑",
       "Bas goal set kiya, karne ka kya?",
@@ -127,17 +120,13 @@
       setTimeout(() => splash.remove(), 700);
     }
 
-    function getUniqueItem(array, key) {
-      const history = JSON.parse(localStorage.getItem(key) || "[]");
-      const available = array.filter(item => !history.includes(item));
-      if (available.length === 0) {
-        localStorage.setItem(key, JSON.stringify([]));
-        return getUniqueItem(array, key);
-      }
-      const choice = available[Math.floor(Math.random() * available.length)];
-      history.push(choice);
-      localStorage.setItem(key, JSON.stringify(history));
-      return choice;
+    function showTaunt() {
+      const history = JSON.parse(localStorage.getItem("taunt_history") || "[]");
+      const available = taunts.filter(t => !history.includes(t));
+      let taunt = available.length ? available[Math.floor(Math.random() * available.length)] : taunts[0];
+      history.push(taunt);
+      localStorage.setItem("taunt_history", JSON.stringify(history));
+      document.getElementById("tauntBox").innerText = taunt;
     }
 
     function handleGoalSubmit(e) {
@@ -146,28 +135,15 @@
       const lang = document.getElementById("langInput").value;
       if (!goal || !lang) return;
 
-      localStorage.setItem("goal", goal);
-      localStorage.setItem("lang", lang);
-      localStorage.setItem("progress", "0");
-      localStorage.setItem("task_done", "no");
-      generateNewTask();
-    }
-
-    function generateNewTask() {
-      const newTask = getUniqueItem(tasks, "task_history");
-      localStorage.setItem("task", newTask);
-      localStorage.setItem("task_done", "no");
-
-      document.getElementById("taskText").innerText = newTask;
-      document.getElementById("taskSection").classList.remove("hidden");
-      document.getElementById("newTaskBtn").classList.add("hidden");
-      document.getElementById("submitBtn").disabled = true;
-      document.getElementById("submitBtn").innerText = "⚠️ Complete current task first!";
+      fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `goal=${encodeURIComponent(goal)}&lang=${encodeURIComponent(lang)}`
+      }).then(() => location.reload());
     }
 
     function markCompleted() {
-      let progress = parseInt(localStorage.getItem("progress") || "0");
-      progress += 1;
+      let progress = parseInt(localStorage.getItem("progress") || "0") + 1;
       localStorage.setItem("task_done", "yes");
       localStorage.setItem("progress", progress);
       alert(`✅ Task marked as done! Progress: ${progress}/30`);
@@ -177,22 +153,16 @@
     function deleteGoal() {
       if (confirm("Are you sure you want to delete this goal and reset everything?")) {
         localStorage.clear();
-        alert("🗑️ All data cleared.");
         location.reload();
       }
-    }
-
-    function showTaunt() {
-      const msg = getUniqueItem(taunts, "taunt_history");
-      document.getElementById("tauntBox").innerText = msg;
     }
 
     window.onload = function () {
       const goal = localStorage.getItem("goal");
       const lang = localStorage.getItem("lang");
+      const task = {{ task|tojson|default('null') }};
       const taskDone = localStorage.getItem("task_done");
       const progress = parseInt(localStorage.getItem("progress") || "0");
-      const task = localStorage.getItem("task");
 
       if (goal) {
         document.getElementById("savedInfo").classList.remove("hidden");
@@ -207,14 +177,19 @@
 
       if (progress > 0) {
         document.getElementById("progressCount").innerText = progress;
-        const percent = Math.min(100, Math.floor((progress / 30) * 100));
-        document.getElementById("progressBar").style.width = percent + "%";
+        document.getElementById("progressBar").style.width = `${(progress / 30) * 100}%`;
         if (progress >= 3) document.getElementById("encourage").classList.remove("hidden");
       }
 
       if (task) {
+        localStorage.setItem("task", task);
+        localStorage.setItem("task_done", "no");
+      }
+
+      const savedTask = localStorage.getItem("task");
+      if (savedTask) {
+        document.getElementById("taskText").innerText = savedTask;
         document.getElementById("taskSection").classList.remove("hidden");
-        document.getElementById("taskText").innerText = task;
       }
 
       if (taskDone === "no") {
