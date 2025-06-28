@@ -9,13 +9,13 @@
     #loader { display: none; }
     .dark body { background-color: #1a202c; color: white; }
     .dark .bg-white { background-color: #2d3748; }
-    .dark .text-gray-700, .dark .text-gray-600, .dark .text-gray-900 { color: #e2e8f0; }
+    .dark .text-gray-700, .dark .text-gray-600, .dark .text-gray-900, .dark label { color: #e2e8f0; }
     .dark .border-gray-200 { border-color: #4a5568; }
     .dark .bg-gray-50 { background-color: #2d3748; }
+    .dark textarea { background-color: #2d3748; color: white; }
   </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-100 via-white to-pink-100 min-h-screen font-sans transition-colors duration-300">
-
   <!-- Splash Screen -->
   <div id="splashScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-black">
     <video autoplay muted playsinline onended="hideSplash()" class="w-full h-full object-cover">
@@ -56,19 +56,27 @@
       <!-- Settings Form -->
       <form id="settingsForm" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium dark:text-white">Your Name:</label>
+          <label class="block text-sm font-medium">Your Name:</label>
           <input id="userName" type="text" placeholder="e.g. Ramesh" class="mt-1 block w-full rounded-lg border p-3">
         </div>
         <div>
-          <label class="block text-sm font-medium dark:text-white">Age:</label>
+          <label class="block text-sm font-medium">Age:</label>
           <input id="userAge" type="number" placeholder="e.g. 25" class="mt-1 block w-full rounded-lg border p-3">
         </div>
         <div>
-          <label class="block text-sm font-medium dark:text-white">Gender:</label>
+          <label class="block text-sm font-medium">Gender:</label>
           <select id="userGender" class="mt-1 block w-full rounded-lg border p-3">
             <option value="male">Male</option>
             <option value="female">Female</option>
             <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium">Preferred Language:</label>
+          <select id="langInput" required class="mt-1 block w-full rounded-lg border p-3">
+            <option value="english">English</option>
+            <option value="hindi">हिंदी</option>
+            <option value="marathi">मराठी</option>
           </select>
         </div>
       </form>
@@ -87,16 +95,8 @@
       <!-- Goal Form -->
       <form id="goalForm" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium dark:text-white">Your Goal:</label>
-          <textarea id="goalInput" required placeholder="I want to become rich" class="mt-1 block w-full rounded-lg border p-3"></textarea>
-        </div>
-        <div>
-          <label class="block text-sm font-medium dark:text-white">Preferred Language:</label>
-          <select id="langInput" required class="mt-1 block w-full rounded-lg border p-3">
-            <option value="english">English</option>
-            <option value="hindi">हिंदी</option>
-            <option value="marathi">मराठी</option>
-          </select>
+          <label class="block text-sm font-medium">Your Goal:</label>
+          <textarea id="goalInput" required placeholder="I want to become rich" class="mt-1 block w-full rounded-lg border p-3 dark:bg-gray-800 dark:text-white"></textarea>
         </div>
         <button id="actionBtn" type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition-all duration-300 transform hover:scale-105">
           🔥 Get Today’s AI Task
@@ -106,7 +106,7 @@
       <div id="taskSection" class="hidden">
         <div class="bg-indigo-50 p-4 rounded-xl border space-y-4 dark:bg-indigo-900">
           <h3 class="text-lg font-semibold text-indigo-700">🧠 Today's Task</h3>
-          <blockquote id="taskText" class="italic p-4 bg-white rounded-xl shadow border-l-4 border-indigo-500 dark:bg-gray-800"></blockquote>
+          <blockquote id="taskText" class="italic p-4 bg-white rounded-xl shadow border-l-4 border-indigo-500 dark:bg-gray-800 dark:text-white"></blockquote>
           <div class="flex gap-3">
             <button onclick="markCompleted()" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">✅ Mark Done</button>
             <button onclick="deleteGoal()" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">🗑️ Reset</button>
@@ -134,7 +134,6 @@
         "didi": ["Didi, task chhod diya kya? 😶", "Goal likh ke bhool gayi kya?", "AI bhi confuse ho gaya 🤨"],
         "sir/madam": ["Sir/Madam, aap se yeh umeed nahi thi 😅", "Thoda discipline dikhaiye 🙏"]
       };
-      const list = taunts[tone];
       document.getElementById("tauntBox").innerText = list[Math.floor(Math.random() * list.length)];
     }
 
@@ -154,11 +153,16 @@
 
     async function generateTask(goal, lang) {
       document.getElementById("loader").style.display = "flex";
+      const name = localStorage.getItem("name") || "";
+      const age = localStorage.getItem("age") || "";
+      const gender = localStorage.getItem("gender") || "";
+
       const response = await fetch("/", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `goal=${encodeURIComponent(goal)}&lang=${encodeURIComponent(lang)}`
+        body: `goal=${encodeURIComponent(goal)}&lang=${encodeURIComponent(lang)}&name=${encodeURIComponent(name)}&age=${encodeURIComponent(age)}&gender=${encodeURIComponent(gender)}`
       });
+
       const html = await response.text();
       document.open(); document.write(html); document.close();
     }
@@ -166,11 +170,14 @@
     document.getElementById("goalForm").onsubmit = async (e) => {
       e.preventDefault();
       localStorage.setItem("goal", goalInput.value.trim());
-      localStorage.setItem("lang", langInput.value);
       localStorage.setItem("task_done", "no");
+
+      // save latest values from settings
       localStorage.setItem("name", userName.value.trim());
       localStorage.setItem("age", userAge.value);
       localStorage.setItem("gender", userGender.value);
+      localStorage.setItem("lang", langInput.value);
+
       await generateTask(goalInput.value.trim(), langInput.value);
     }
 
@@ -191,8 +198,14 @@
 
     window.onload = () => {
       if (localStorage.getItem("darkmode") === "yes") document.documentElement.classList.add("dark");
-      ["userName", "userAge", "userGender"].forEach(id => {
-        if (localStorage.getItem(id.replace("user", "").toLowerCase())) document.getElementById(id).value = localStorage.getItem(id.replace("user", "").toLowerCase());
+
+      // Restore settings
+      ["name", "age", "gender", "lang"].forEach(key => {
+        const val = localStorage.getItem(key);
+        if (val) {
+          document.getElementById(`user${key.charAt(0).toUpperCase() + key.slice(1)}`).value = val;
+          if (key === "lang") langInput.value = val;
+        }
       });
 
       const goal = localStorage.getItem("goal");
@@ -208,7 +221,6 @@
         savedGoalText.innerText = goal;
         savedLangText.innerText = lang;
         goalInput.value = goal;
-        langInput.value = lang;
         progressCount.innerText = progress;
         progressBar.style.width = `${(progress / 30) * 100}%`;
         if (progress >= 3) encourage.classList.remove("hidden");
@@ -243,5 +255,4 @@
     }
   </script>
 </body>
-            </html>
-            
+  </html>
