@@ -128,8 +128,10 @@ def get_unique_reminder(name=None, age=None, gender=None):
     }
 
     tone = "bhai"
-    if age and age.isdigit() and int(age) >= 50: tone = "sir/madam"
-    elif gender and gender.lower() == "female": tone = "didi"
+    if age and age.isdigit() and int(age) >= 50:
+        tone = "sir/madam"
+    elif gender and gender.lower() == "female":
+        tone = "didi"
 
     memory = load_json(REMINDER_HISTORY_FILE, {})
     used = memory.get(tone, [])
@@ -150,12 +152,12 @@ def get_unique_reminder(name=None, age=None, gender=None):
 def home():
     return render_template("index.html")
 
-# ⚙️ Settings
+# ⚙️ Settings Page
 @app.route("/settings")
 def settings():
     return render_template("settings.html")
 
-# 🔥 Daily Task API
+# 🔥 Generate Daily Task API
 @app.route("/generate", methods=["POST"])
 def generate():
     goal = request.form.get("goal", "").strip()
@@ -194,6 +196,6 @@ def reminder():
     text = get_unique_reminder(name, age, gender)
     return jsonify({"reminder": text})
 
-# ▶️ Run
+# ▶️ Flask Server
 if __name__ == "__main__":
     app.run(debug=True)
