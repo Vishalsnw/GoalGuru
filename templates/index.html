@@ -13,7 +13,7 @@
       apiKey: "AIzaSyCrhiivmQr0cMW6KJ2X366_zfMil_Yktuo",
       authDomain: "goalguru-e0e30.firebaseapp.com",
       projectId: "goalguru-e0e30",
-      storageBucket: "goalguru-e0e30.firebasestorage.app",
+      storageBucket: "goalguru-e0e30.appspot.com",
       messagingSenderId: "655564345934",
       appId: "1:655564345934:web:9a36e84b109e176978291f",
       measurementId: "G-ZGNT32YDR3"
@@ -49,68 +49,50 @@
       }
     }
   </script>
-  <style>
-    #loader { display: none; }
-    #customToast, #reminderToast {
-      opacity: 0;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.95);
-      transition: opacity 0.5s ease, transform 0.5s ease;
-      padding: 1rem 1.5rem;
-      font-weight: 600;
-      border-radius: 0.75rem;
-      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-      z-index: 9999;
-      text-align: center;
-      max-width: 80%;
-    }
-    #customToast.show, #reminderToast.show {
-      opacity: 1;
-      transform: translate(-50%, -50%) scale(1);
-    }
-    #customToast { background-color: #16a34a; color: white; }
-    #reminderToast { background-color: #dc2626; color: white; }
-    .dark body { background-color: #1a202c; color: white; }
-    .dark .bg-white { background-color: #2d3748; }
-    .dark .text-gray-700, .dark .text-gray-600, .dark .text-gray-900, .dark label { color: #e2e8f0; }
-    .dark .border-gray-200 { border-color: #4a5568; }
-    .dark .bg-gray-50 { background-color: #2d3748; }
-    .dark textarea { background-color: #2d3748; color: white; }
-  </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-100 via-white to-pink-100 min-h-screen font-sans transition-colors duration-300">
+<body>
+  <!-- Keep your entire HTML here, no change needed -->
 
-<!-- Existing HTML content remains unchanged -->
+  <script>
+    window.onload = async () => {
+      if (localStorage.getItem("darkmode") === "yes") {
+        document.documentElement.classList.add("dark");
+      }
+      await loadFromFirebase();
 
-<script>
-window.onload = async () => {
-  if (localStorage.getItem("darkmode") === "yes") {
-    document.documentElement.classList.add("dark");
-  }
-  await loadFromFirebase();
-  if (localStorage.getItem("roadmap_shown") !== "yes") {
-    document.getElementById("roadmapSection").classList.add("hidden");
-  }
-  setTimeout(hideSplash, 6000);
-};
+      const goal = localStorage.getItem("goal");
+      const task = localStorage.getItem("task");
+      if (goal) {
+        document.getElementById("savedGoalText").innerText = goal;
+        document.getElementById("savedLangText").innerText = localStorage.getItem("lang") || "english";
+        document.getElementById("savedInfo").classList.remove("hidden");
+        updateProgressUI();
+      }
+      if (task) {
+        document.getElementById("taskText").innerText = task;
+        document.getElementById("taskSection").classList.remove("hidden");
+      }
+      if (localStorage.getItem("roadmap_shown") !== "yes") {
+        document.getElementById("roadmapSection").classList.add("hidden");
+      }
+      setTimeout(hideSplash, 6000);
+    };
 
-async function markCompleted() {
-  if (localStorage.getItem("task_done") === "yes") return;
-  let count = parseInt(localStorage.getItem("progress") || "0") + 1;
-  localStorage.setItem("progress", count);
-  localStorage.setItem("task_done", "yes");
-  updateProgressUI();
-  await saveToFirebase(
-    localStorage.getItem("goal"),
-    localStorage.getItem("lang"),
-    localStorage.getItem("task"),
-    count
-  );
-  document.getElementById("customToast").classList.add("show");
-  setTimeout(() => document.getElementById("customToast").classList.remove("show"), 2500);
-}
-</script>
+    async function markCompleted() {
+      if (localStorage.getItem("task_done") === "yes") return;
+      let count = parseInt(localStorage.getItem("progress") || "0") + 1;
+      localStorage.setItem("progress", count);
+      localStorage.setItem("task_done", "yes");
+      updateProgressUI();
+      await saveToFirebase(
+        localStorage.getItem("goal"),
+        localStorage.getItem("lang"),
+        localStorage.getItem("task"),
+        count
+      );
+      document.getElementById("customToast").classList.add("show");
+      setTimeout(() => document.getElementById("customToast").classList.remove("show"), 2500);
+    }
+  </script>
 </body>
 </html>
