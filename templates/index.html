@@ -46,6 +46,11 @@
           document.getElementById("taskText").innerText = data.task;
           document.getElementById("taskSection").classList.remove("hidden");
         }
+        localStorage.setItem("goal", data.goal || "");
+        localStorage.setItem("lang", data.lang || "english");
+        localStorage.setItem("task", data.task || "");
+        localStorage.setItem("progress", data.progress || "0");
+        localStorage.setItem("task_done", "no");
       }
     }
   </script>
@@ -198,4 +203,5 @@ document.getElementById("goalForm").onsubmit = async (e) => {
 };
 </script>
 </body>
-</html>
+  </html>
+  
