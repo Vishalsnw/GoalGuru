@@ -31,68 +31,202 @@
         progress,
         last_updated: new Date()
       });
-    }
+    };
 
     window.loadFromFirebase = async function() {
       const docSnap = await getDoc(doc(db, "users", USER_ID));
       if (docSnap.exists()) {
         const data = docSnap.data();
-        document.getElementById("savedGoalText").innerText = data.goal || "";
-        document.getElementById("savedLangText").innerText = data.lang || "english";
-        document.getElementById("progressCount").innerText = data.progress || "0";
-        document.getElementById("progressBar").style.width = `${(data.progress / 30) * 100}%`;
-        if (data.goal) document.getElementById("savedInfo").classList.remove("hidden");
-        if (data.task) {
-          document.getElementById("taskText").innerText = data.task;
-          document.getElementById("taskSection").classList.remove("hidden");
-        }
+        localStorage.setItem("goal", data.goal);
+        localStorage.setItem("lang", data.lang);
+        localStorage.setItem("task", data.task);
+        localStorage.setItem("progress", data.progress);
+        localStorage.setItem("roadmap_shown", "yes");
+        localStorage.setItem("task_done", "no");
       }
-    }
-  </script>
-</head>
-<body>
-  <!-- Keep your entire HTML here, no change needed -->
-
-  <script>
-    window.onload = async () => {
-      if (localStorage.getItem("darkmode") === "yes") {
-        document.documentElement.classList.add("dark");
-      }
-      await loadFromFirebase();
-
-      const goal = localStorage.getItem("goal");
-      const task = localStorage.getItem("task");
-      if (goal) {
-        document.getElementById("savedGoalText").innerText = goal;
-        document.getElementById("savedLangText").innerText = localStorage.getItem("lang") || "english";
-        document.getElementById("savedInfo").classList.remove("hidden");
-        updateProgressUI();
-      }
-      if (task) {
-        document.getElementById("taskText").innerText = task;
-        document.getElementById("taskSection").classList.remove("hidden");
-      }
-      if (localStorage.getItem("roadmap_shown") !== "yes") {
-        document.getElementById("roadmapSection").classList.add("hidden");
-      }
-      setTimeout(hideSplash, 6000);
     };
-
-    async function markCompleted() {
-      if (localStorage.getItem("task_done") === "yes") return;
-      let count = parseInt(localStorage.getItem("progress") || "0") + 1;
-      localStorage.setItem("progress", count);
-      localStorage.setItem("task_done", "yes");
-      updateProgressUI();
-      await saveToFirebase(
-        localStorage.getItem("goal"),
-        localStorage.getItem("lang"),
-        localStorage.getItem("task"),
-        count
-      );
-      document.getElementById("customToast").classList.add("show");
-      setTimeout(() => document.getElementById("customToast").classList.remove("show"), 2500);
-    }
   </script>
+
+  <style>
+    #loader { display: none; }
+    #customToast {
+      opacity: 0;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.95);
+      transition: all 0.4s ease;
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      border-radius: 0.75rem;
+      background-color: #16a34a;
+      color: white;
+      z-index: 9999;
+      max-width: 80%;
+      text-align: center;
+    }
+    #customToast.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .dark body { background-color: #1a202c; color: white; }
+    .dark .bg-white { background-color: #2d3748; }
+    .dark textarea { background-color: #2d3748; color: white; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 via-white to-pink-100 min-h-screen font-sans">
+
+<div id="customToast">✅ Progress saved!</div>
+
+<div id="splashScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-black">
+  <video autoplay muted playsinline onended="hideSplash()" class="w-full h-full object-cover">
+    <source src="/static/splash.mp4" type="video/mp4">
+  </video>
+</div>
+
+<div id="loader" class="fixed inset-0 z-40 flex items-center justify-center bg-white bg-opacity-90">
+  <div class="text-center">
+    <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+    <p class="text-indigo-600 mt-2 text-sm">Generating your AI task...</p>
+  </div>
+</div>
+
+<header class="bg-indigo-600 text-white py-4 sticky top-0 shadow-md">
+  <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold">🎯 GoalGuru</h1>
+    <button onclick="toggleDarkMode()" class="bg-white text-indigo-600 px-3 py-1 rounded text-sm">🌓</button>
+  </div>
+</header>
+
+<main class="max-w-2xl mx-auto px-4 py-10">
+  <div class="bg-white rounded-3xl p-8 shadow-xl space-y-6">
+    <form id="goalForm" class="space-y-4">
+      <label class="block text-sm font-medium">Your Goal:</label>
+      <textarea id="goalInput" required placeholder="I want to become rich" class="w-full rounded border p-3"></textarea>
+      <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg">🔥 Get AI Task</button>
+    </form>
+
+    <div id="savedInfo" class="hidden space-y-2 text-sm">
+      <p><strong>Goal:</strong> <span id="savedGoalText"></span></p>
+      <p><strong>Language:</strong> <span id="savedLangText"></span></p>
+      <p><strong>Progress:</strong> <span id="progressCount">0</span>/<span id="totalTasks">30</span></p>
+      <div class="w-full bg-gray-300 h-3 rounded">
+        <div id="progressBar" class="bg-indigo-500 h-3 rounded" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div id="taskSection" class="hidden">
+      <h3 class="text-lg font-semibold">🧠 Today’s Task</h3>
+      <blockquote id="taskText" class="bg-gray-100 p-4 rounded border-l-4 border-indigo-600 italic"></blockquote>
+      <div class="flex gap-3 mt-2">
+        <button onclick="markCompleted()" class="bg-green-600 text-white px-4 py-2 rounded">✅ Done</button>
+        <button onclick="deleteGoal()" class="bg-red-500 text-white px-4 py-2 rounded">🗑️ Reset</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+function hideSplash() {
+  const splash = document.getElementById("splashScreen");
+  splash?.classList.add("opacity-0");
+  setTimeout(() => splash?.remove(), 700);
+}
+
+function updateProgressUI() {
+  const progress = parseInt(localStorage.getItem("progress") || "0");
+  const total = parseInt(localStorage.getItem("totalTasks") || "30");
+  document.getElementById("progressCount").innerText = progress;
+  document.getElementById("totalTasks").innerText = total;
+  document.getElementById("progressBar").style.width = `${(progress / total) * 100}%`;
+}
+
+document.getElementById("goalForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const goal = document.getElementById("goalInput").value.trim();
+  const lang = "english";
+  localStorage.setItem("goal", goal);
+  localStorage.setItem("lang", lang);
+  localStorage.setItem("progress", "0");
+  localStorage.setItem("roadmap_shown", "yes");
+
+  document.getElementById("loader").style.display = "flex";
+
+  try {
+    const res = await fetch("/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ goal, lang })
+    });
+    const { task } = await res.json();
+    localStorage.setItem("task", task);
+    localStorage.setItem("task_done", "no");
+
+    document.getElementById("taskText").innerText = task;
+    document.getElementById("taskSection").classList.remove("hidden");
+    document.getElementById("savedGoalText").innerText = goal;
+    document.getElementById("savedLangText").innerText = lang;
+    document.getElementById("savedInfo").classList.remove("hidden");
+
+    await saveToFirebase(goal, lang, task, 0);
+  } catch (err) {
+    alert("❌ Something went wrong!");
+  }
+
+  document.getElementById("loader").style.display = "none";
+};
+
+function markCompleted() {
+  if (localStorage.getItem("task_done") === "yes") return;
+  let progress = parseInt(localStorage.getItem("progress") || "0") + 1;
+  localStorage.setItem("progress", progress);
+  localStorage.setItem("task_done", "yes");
+  updateProgressUI();
+  saveToFirebase(
+    localStorage.getItem("goal"),
+    localStorage.getItem("lang"),
+    localStorage.getItem("task"),
+    progress
+  );
+  const toast = document.getElementById("customToast");
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2500);
+}
+
+function deleteGoal() {
+  localStorage.clear();
+  location.reload();
+}
+
+function toggleDarkMode() {
+  document.documentElement.classList.toggle("dark");
+  localStorage.setItem("darkmode", document.documentElement.classList.contains("dark") ? "yes" : "no");
+}
+
+window.onload = async () => {
+  if (localStorage.getItem("darkmode") === "yes") {
+    document.documentElement.classList.add("dark");
+  }
+
+  await loadFromFirebase();
+
+  const goal = localStorage.getItem("goal");
+  const task = localStorage.getItem("task");
+
+  if (goal) {
+    document.getElementById("savedGoalText").innerText = goal;
+    document.getElementById("savedLangText").innerText = localStorage.getItem("lang");
+    document.getElementById("savedInfo").classList.remove("hidden");
+  }
+
+  if (task) {
+    document.getElementById("taskText").innerText = task;
+    document.getElementById("taskSection").classList.remove("hidden");
+  }
+
+  updateProgressUI();
+  setTimeout(hideSplash, 4000);
+};
+</script>
 </body>
 </html>
