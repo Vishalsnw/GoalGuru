@@ -31,7 +31,7 @@
         progress,
         last_updated: new Date()
       });
-    }
+    };
 
     window.loadFromFirebase = async function() {
       const docSnap = await getDoc(doc(db, "users", USER_ID));
@@ -52,16 +52,25 @@
         localStorage.setItem("progress", data.progress || "0");
         localStorage.setItem("task_done", "no");
       }
-    }
+    };
   </script>
   <style>
     #loader { display: none; }
     #customToast {
-      opacity: 0; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95);
+      opacity: 0;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.95);
       transition: opacity 0.5s ease, transform 0.5s ease;
-      padding: 1rem 1.5rem; font-weight: 600; border-radius: 0.75rem;
-      background-color: #16a34a; color: white;
-      z-index: 9999; text-align: center; max-width: 80%;
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      border-radius: 0.75rem;
+      background-color: #16a34a;
+      color: white;
+      z-index: 9999;
+      text-align: center;
+      max-width: 80%;
     }
     #customToast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   </style>
@@ -189,47 +198,67 @@ window.onload = async () => {
   }
   await loadFromFirebase();
   setTimeout(hideSplash, 6000);
+
+  const goal = localStorage.getItem("goal");
+  const task = localStorage.getItem("task");
+  if (goal && task) {
+    document.getElementById("goalForm").classList.add("hidden");
+  }
 };
 
 document.getElementById("goalForm").onsubmit = async (e) => {
   e.preventDefault();
+
+  if (localStorage.getItem("goal") && localStorage.getItem("task")) {
+    alert("⚠️ Goal already set. Reset if you want to start fresh.");
+    return;
+  }
+
   const name = document.getElementById("nameInput").value.trim();
   const age = document.getElementById("ageInput").value.trim();
   const gender = document.getElementById("genderInput").value.trim();
   const goal = document.getElementById("goalInput").value.trim();
   const lang = "english";
+
   document.getElementById("loader").style.display = "flex";
 
-  const roadmapRes = await fetch("/roadmap", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ goal, lang, name, age, gender })
-  });
-  const roadmapData = await roadmapRes.json();
-  document.getElementById("roadmapText").innerText = roadmapData.roadmap || "⚠️ Roadmap unavailable";
-  document.getElementById("roadmapSection").classList.remove("hidden");
+  try {
+    const roadmapRes = await fetch("/roadmap", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ goal, lang, name, age, gender })
+    });
+    const roadmapData = await roadmapRes.json();
+    document.getElementById("roadmapText").innerText = roadmapData.roadmap || "⚠️ Roadmap unavailable";
+    document.getElementById("roadmapSection").classList.remove("hidden");
 
-  const taskRes = await fetch("/generate", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ goal, lang, name, age, gender })
-  });
-  const taskData = await taskRes.json();
+    const taskRes = await fetch("/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ goal, lang, name, age, gender })
+    });
+    const taskData = await taskRes.json();
 
-  localStorage.setItem("goal", goal);
-  localStorage.setItem("lang", lang);
-  localStorage.setItem("task", taskData.task);
-  localStorage.setItem("progress", "0");
-  localStorage.setItem("task_done", "no");
+    localStorage.setItem("goal", goal);
+    localStorage.setItem("lang", lang);
+    localStorage.setItem("task", taskData.task);
+    localStorage.setItem("progress", "0");
+    localStorage.setItem("task_done", "no");
 
-  document.getElementById("taskText").innerText = taskData.task;
-  document.getElementById("taskSection").classList.remove("hidden");
-  document.getElementById("savedGoalText").innerText = goal;
-  document.getElementById("savedLangText").innerText = lang;
-  document.getElementById("savedInfo").classList.remove("hidden");
-  await saveToFirebase(goal, lang, taskData.task, 0);
+    document.getElementById("taskText").innerText = taskData.task;
+    document.getElementById("taskSection").classList.remove("hidden");
+    document.getElementById("savedGoalText").innerText = goal;
+    document.getElementById("savedLangText").innerText = lang;
+    document.getElementById("savedInfo").classList.remove("hidden");
+
+    await saveToFirebase(goal, lang, taskData.task, 0);
+  } catch (err) {
+    alert("❌ Error generating task. Try again.");
+    console.error(err);
+  }
+
   document.getElementById("loader").style.display = "none";
 };
 </script>
 </body>
-</html>
+          </html>
