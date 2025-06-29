@@ -91,6 +91,7 @@
       <div class="absolute right-0 mt-2 hidden group-hover:block bg-white text-gray-700 shadow-lg rounded-md overflow-hidden z-20">
         <a href="#goalForm" class="block px-4 py-2 text-sm hover:bg-indigo-100">🎯 Set New Goal</a>
         <a href="#savedInfo" class="block px-4 py-2 text-sm hover:bg-indigo-100">📊 View Progress</a>
+        <a href="#roadmapSection" class="block px-4 py-2 text-sm hover:bg-indigo-100">🗺️ View Roadmap</a>
         <a href="javascript:void(0)" onclick="toggleDarkMode()" class="block px-4 py-2 text-sm hover:bg-indigo-100">🌓 Toggle Dark Mode</a>
         <a href="javascript:void(0)" onclick="deleteGoal()" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100">🗑️ Reset Everything</a>
       </div>
@@ -102,6 +103,28 @@
   <div class="bg-white shadow-2xl rounded-3xl p-8 space-y-6 border border-gray-200">
     <p class="text-center text-gray-600 text-sm">Your desi AI accountability buddy</p>
 
+    <form id="goalForm" class="space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <input id="nameInput" placeholder="Your Name" class="border p-2 rounded" />
+        <input id="ageInput" type="number" placeholder="Your Age" class="border p-2 rounded" />
+        <select id="genderInput" class="border p-2 rounded">
+          <option value="">Select Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium">Your Goal:</label>
+        <textarea id="goalInput" required placeholder="I want to become rich" class="mt-1 block w-full rounded-lg border p-3"></textarea>
+      </div>
+      <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg">🔥 Get Roadmap & Task</button>
+    </form>
+
+    <div id="roadmapSection" class="hidden">
+      <h3 class="text-lg font-semibold text-indigo-700">🗺️ Your Roadmap</h3>
+      <pre id="roadmapText" class="p-4 bg-gray-100 rounded text-sm whitespace-pre-wrap"></pre>
+    </div>
+
     <div id="savedInfo" class="hidden bg-gray-50 p-4 rounded-xl text-sm border space-y-2">
       <p><strong>Your Goal:</strong> <span id="savedGoalText"></span></p>
       <p><strong>Language:</strong> <span id="savedLangText"></span></p>
@@ -110,14 +133,6 @@
         <div id="progressBar" class="bg-indigo-500 h-3 rounded-full" style="width: 0%"></div>
       </div>
     </div>
-
-    <form id="goalForm" class="space-y-4">
-      <div>
-        <label class="block text-sm font-medium">Your Goal:</label>
-        <textarea id="goalInput" required placeholder="I want to become rich" class="mt-1 block w-full rounded-lg border p-3"></textarea>
-      </div>
-      <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg">🔥 Get Today’s AI Task</button>
-    </form>
 
     <div id="taskSection" class="hidden">
       <div class="bg-indigo-50 p-4 rounded-xl border space-y-4">
@@ -178,30 +193,43 @@ window.onload = async () => {
 
 document.getElementById("goalForm").onsubmit = async (e) => {
   e.preventDefault();
+  const name = document.getElementById("nameInput").value.trim();
+  const age = document.getElementById("ageInput").value.trim();
+  const gender = document.getElementById("genderInput").value.trim();
   const goal = document.getElementById("goalInput").value.trim();
   const lang = "english";
   document.getElementById("loader").style.display = "flex";
 
-  const res = await fetch("/generate", {
+  const roadmapRes = await fetch("/roadmap", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ goal, lang })
+    body: new URLSearchParams({ goal, lang, name, age, gender })
   });
-  const { task } = await res.json();
+  const roadmapData = await roadmapRes.json();
+  document.getElementById("roadmapText").innerText = roadmapData.roadmap || "⚠️ Roadmap unavailable";
+  document.getElementById("roadmapSection").classList.remove("hidden");
+
+  const taskRes = await fetch("/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ goal, lang, name, age, gender })
+  });
+  const taskData = await taskRes.json();
+
   localStorage.setItem("goal", goal);
   localStorage.setItem("lang", lang);
-  localStorage.setItem("task", task);
+  localStorage.setItem("task", taskData.task);
   localStorage.setItem("progress", "0");
   localStorage.setItem("task_done", "no");
-  document.getElementById("taskText").innerText = task;
+
+  document.getElementById("taskText").innerText = taskData.task;
   document.getElementById("taskSection").classList.remove("hidden");
   document.getElementById("savedGoalText").innerText = goal;
   document.getElementById("savedLangText").innerText = lang;
   document.getElementById("savedInfo").classList.remove("hidden");
-  await saveToFirebase(goal, lang, task, 0);
+  await saveToFirebase(goal, lang, taskData.task, 0);
   document.getElementById("loader").style.display = "none";
 };
 </script>
 </body>
-  </html>
-  
+</html>
